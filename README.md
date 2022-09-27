@@ -29,6 +29,7 @@
 Параметр `id`:
  - Если нужно подписать ключем PFX, то `id` нужно получить из функции `load_key`
  - Если нужно подписать ключем ID-карты, то `id` = `"idcard"`
+
 Смотрите пример https://dls.yt.uz/pfx-idcard-pkcs7.html
 
 ## 2. E-IMZO-SERVER
@@ -125,6 +126,44 @@ tsp.jks.file.path=keys/truststore.jks
 *Тестовая конфигурация может отличаться от приведенной выше конфигурации*
 
 ## 3.1. Описание методов
+
+E-IMZO-SERVER предоставляет REST-API методы к которым может обращаться Backend приложение или HTML/JavaScript приложение на прямую.
+
+Методы начинающиеся с `/backend` **должны быть доступны только Backend приложению**, а методы начинающиеся с `/frontend` могут быть доступны как Backend приложению так и HTML/JavaScript приложению.
+
+Изоляцию методов можно осуществить с помощю `Nginx`.
+Пример конфигурации `Nginx`:
+```
+server {
+	listen 80;
+	
+	root /usr/share/nginx/html;
+	index index.html index.htm;
+	
+	server_name example.uz;
+
+	location /frontend {
+		proxy_set_header   Host             $host;
+		proxy_set_header   X-Real-IP        $remote_addr;
+		proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+
+		proxy_pass http://E-IMZO-SERVER:8080;
+	}	
+  
+	location / {
+		proxy_set_header   Host             $host;
+		proxy_set_header   X-Real-IP        $remote_addr;
+		proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+
+		proxy_pass http://YOUR-BACKEND-APP:8080;
+	}
+
+}
+```
+`YOUR-BACKEND-APP:8080` - IP-Адрес и порт сервера где работает ваше Backend приложение.
+
+`E-IMZO-SERVER:8080` - IP-Адрес и порт сервера где работает E-IMZO-SERVER.
+
 ### 3.1.1. /frontend/challenge
 ### 3.1.2. /backend/auth
 ### 3.1.3. /frontend/timestamp/pkcs7
