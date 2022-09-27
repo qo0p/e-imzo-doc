@@ -1,3 +1,5 @@
+
+
 # E-IMZO - ИНСТРУКЦИЯ ПО ИНТЕГРАЦИИ
 
 ## 1. E-IMZO
@@ -164,13 +166,77 @@ server {
 `E-IMZO-SERVER:8080` - IP-Адрес и порт сервера где работает E-IMZO-SERVER.
 
 ### 3.1.1. /frontend/challenge
+
+Метод нужен для генерации случайного значение `Challenge` которое пользоваетль должен будет подписать и создать PKCS#7 документ.
+
+Пример вызова CURL командой:
+```
+curl -v http://127.0.0.1:8080/frontend/challenge
+```
+Ответ
+```
+{
+  "challenge": "9b573e40-cefd-42cc-a534-f6e78b27c2ae",
+  "ttl": 120,
+  "status": 1,
+  "message": ""
+}
+```
+HTTP 200 - означает успешное выполнение HTTP запроса
+
+`status` - код состояния (1 - Успешно, иначе ошибка)
+
+`message` - если `status` не равно 1, то сообщения об ошибки.
+
+`challenge` - случайного значение которое пользоваетль должен будет подписать и создать PKCS#7 документ с помощю E-IMZO.
+
+`ttl` - время жизни `challenge` в секундах.
+
+Смотрите пример http://test.e-imzo.local/demo/
+
 ### 3.1.2. /backend/auth
+
+Метод нужен для аутентификации пользователя по PKCS#7 документу которое содежит `Challenge`
+
+Пример вызова CURL командой:
+
+```
+curl -v -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -X POST -d 'MIAGCSqGSIb...ak5wAAAAAAAA=' http://127.0.0.1:8080/backend/auth
+```
+В HTTP -заголовке  `X-Real-IP` - должен передаваться  IP-Адрес пользователя а в `Host` - должен передаваться доменное имя сайта куда пользователь выполяет Вход.
+
+Тело запроса должно содержать Base64-закодированный PKCS#7 документ.
+
+Ответ:
+```
+{
+  "subjectCertificateInfo": {
+    "serialNumber": "218711a92",
+    "subjectName": {
+      "1.2.860.3.16.1.2": "11111111111111",
+      "CN": "sfasdfa s asdfasd"
+    },
+    "validFrom": "2022-09-24 17:29:21",
+    "validTo": "2022-10-24 17:29:21"
+  },
+  "status": 1,
+  "message": ""
+}
+```
+HTTP 200 - означает успешное выполнение HTTP запроса
+
+`status` - код состояния (1 - Успешно, иначе ошибка)
+
+`message` - если `status` не равно 1, то сообщения об ошибки.
+
+`subjectCertificateInfo` - информация о пользователе и его серитификате.
+
 ### 3.1.3. /frontend/timestamp/pkcs7
 ### 3.1.4. /backend/pkcs7/verify/attached
-### 3.1.4. /backend/pkcs7/verify/detached
-### 3.1.5. /frontend/pkcs7/make-attached
-### 3.1.6. /frontend/pkcs7/join
-## 4. UseCase
+### 3.1.5. /backend/pkcs7/verify/detached
+### 3.1.6. /frontend/pkcs7/make-attached
+### 3.1.7. /frontend/pkcs7/join
+## 4. Use Cases
 ### 3.1. Authentication
 ### 3.2. Sign/Verify
 
