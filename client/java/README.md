@@ -4,6 +4,17 @@
 
 Для применения библиотеки подключите `e-imzo-server-client-1.0-SNAPSHOT.jar` и `gson-2.8.6.jar` к Java проекту.
 
+Импортируйте Java-классы
+
+```
+
+import uz.yt.eimzo.server.client.Client;
+import uz.yt.eimzo.server.client.http.HttpClient;
+import uz.yt.eimzo.server.client.json.AuthJsonResponse;
+import uz.yt.eimzo.server.client.json.Pkcs7VerifyJsonResponse;
+
+```
+
 ## Пример вызова методов
 
 ```
