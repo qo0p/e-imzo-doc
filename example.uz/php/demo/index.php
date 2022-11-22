@@ -188,18 +188,16 @@ unset($_SESSION["USER_INFO"]);
                         uiShowMessage(s.status + " - " + s.statusText);
                         return;
                     }
-                    var challenge;
                     try {
                         var data = JSON.parse(data);
                         if (data.status != 1) {
-                            uiShowMessage(data.status + " - " + s.message);
+                            uiShowMessage(data.status + " - " + data.message);
                             return;
                         }
-                        challenge = data.challenge;
+                        callback(data.challenge);
                     } catch (e) {
-                        uiShowMessage(s.status + " - " + s.statusText + "<br />" + e);
+                        uiShowMessage(s.status + " - " + s.statusText + ": " + e);
                     }
-                    callback(challenge);
                 });
             }
 
@@ -211,18 +209,17 @@ unset($_SESSION["USER_INFO"]);
                             uiShowMessage(s.status + " - " + s.statusText);
                             return;
                         }
-                        var redirect;
                         try {
                             var data = JSON.parse(data);
                             if (data.status != 1) {
-                                uiShowMessage(data.status + " - " + s.message);
+                                uiShowMessage(data.status + " - " + data.message);
                                 return;
                             }
-                            redirect = data.redirect;
+                            callback(data.redirect);
                         } catch (e) {
-                            uiShowMessage(s.status + " - " + s.statusText + "<br />" + e);
+                            uiShowMessage(s.status + " - " + s.statusText + ": " + e);
                         }
-                        callback(redirect);
+                        
                     }, 'keyId=' + encodeURIComponent(keyId) + '&pkcs7=' + encodeURIComponent(pkcs7));  
                 }, uiHandleError, false);  
             }
