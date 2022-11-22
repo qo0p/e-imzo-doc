@@ -31,7 +31,7 @@
  - Если нужно подписать ключем PFX, то `id` нужно получить из функции `load_key`
  - Если нужно подписать ключем ID-карты, то `id` = `"idcard"`
 
-Смотрите пример https://dls.yt.uz/pfx-idcard-pkcs7.html
+Смотрите пример https://test.e-imzo.uz/demo/
 
 ## 2. E-IMZO-SERVER
 
