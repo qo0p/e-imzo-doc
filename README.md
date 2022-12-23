@@ -22,13 +22,16 @@
       function(event, data){
         console.log(data);
         if (data.success) {
+          // Успешно
           var pkcs7 = data.pkcs7_64;
-          // POST pkcs7      
+                
         } else {
+          // Ошибка обработки в E-IMZO
           window.alert(data.reason);
         }
       },
       function(error){
+        // Ошибка WebSoket соединения
         window.alert(error);
       }
     );
