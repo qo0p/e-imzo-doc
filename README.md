@@ -21,6 +21,12 @@
       },
       function(event, data){
         console.log(data);
+        if (data.success) {
+          var pkcs7 = data.pkcs7_64;
+          // POST pkcs7      
+        } else {
+          window.alert(data.reason);
+        }
       },
       function(error){
         window.alert(error);
