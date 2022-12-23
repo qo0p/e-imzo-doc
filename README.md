@@ -31,7 +31,7 @@
         }
       },
       function(error){
-        // Ошибка WebSoket соединения
+        // Ошибка WebSocket соединения
         window.alert(error);
       }
     );
