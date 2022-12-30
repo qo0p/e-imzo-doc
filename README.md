@@ -690,14 +690,60 @@ E-IMZO ID-CARD REST-API предоставляет REST-API методы к ко
 
 ```mermaid
 sequenceDiagram
-  participant Alice
-  participant Bob
-  Alice->>John: Hello John, how are you?
-  loop Healthcheck
-      John->>John: Fight against hypochondria
-  end
-  Note right of John: Rational thoughts <br/>prevail!
-  John-->>Alice: Great!
-  John->>Bob: How about you?
-  Bob-->>John: Jolly good!
+  actor "Пользователь" as user
+  collection "ID-карта" as idcard
+  lifeline "Моб. прил.\nE-IMZO" as eimzo
+  entity "HTML/JS" as frontend
+  control "PHP" as backend
+  lifeline "REST-API" as rest
+  lifeline "ИС ID-CARD\nE-IMZO MOBILE" as api
+  }
+  user --> frontend "создает Document и нажимает кнопку “Подписать”"
+  frontend --> rest "Ajax: POST /frontend/sign"
+  activate rest
+  rest -l-> "Redis"
+  rest --> frontend "{SiteID, DocumentID}"
+  deactivate rest
+  note right of frontend "HTML/JS: формирует хеш от Document"
+  note right of frontend "HTML/JS: формирует QR-код"
+  fragment loop "опрос состояния" {
+  frontend --> rest "Ajax: POST /frontend/status"
+  frontend <-- rest "{state: 2}"
+  }
+  frontend --> eimzo "QR-код (SiteID, DocumentID, хеш)"
+  activate eimzo
+  note right of eimzo "E-IMZO: декодирует QR-код"
+  note right of eimzo "E-IMZO: извлекает SiteID"
+  note right of eimzo "E-IMZO: извлекает DocumentID"
+  note right of eimzo "E-IMZO: извлекает хеш"
+  eimzo --> user "запрос PIN-кода"
+  user --> eimzo "PIN-код"
+  eimzo --> idcard "PIN-код, хеш"
+  activate idcard
+  note right of idcard "ID-карта: проверяет PIN-код"
+  note right of idcard "ID-карта: формирует ЭЦП"
+  idcard --> eimzo "ЭЦП, SerialNumber"
+  deactivate idcard
+  eimzo --> api "ЭЦП, SerialNumber, SiteID, DocumentID, хеш"
+  deactivate eimzo
+  activate api
+  note right of api "формирует документ PKCS#7 Detached"
+  note right of api "определяет UPLOAD URL по SiteID"
+  api --> rest "POST /frontend/upload PKCS#7, DocumentID, SerialNumber"
+  deactivate api
+  fragment loop "опрос состояния" {
+  frontend --> rest "Ajax: POST /frontend/status"
+  frontend <-- rest "{state: 1}"
+  }
+  frontend --> backend "POST /upload/Document"
+  activate backend
+  backend --> rest "POST /backend/verify"
+  activate rest
+  rest -l-> "Redis"
+  rest -l-> "DSV-SERVER"
+  rest --> backend "{status: 1, subjectCertificateInfo, verificationInfo}"
+  deactivate rest
+  backend --> frontend "Данные пользователя и результата проверки ЭЦП"
+  deactivate backend
+  frontend --> user "документ принят/не принят"
 ```
