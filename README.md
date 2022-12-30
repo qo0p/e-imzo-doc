@@ -8,26 +8,26 @@
 
 Перед вызовом функций E-IMZO необходимо установить API-KEY для домена (с которого выполняется вызов) при загрузки HTML-страницы (window.onload)
 
-      var API_KEYS = [
-        'localhost', '96D0C1491615C82B9A54D9989779DF825B690748224C2B04F500F370D51827CE2644D8D4A82C18184D73AB8530BB8ED537269603F61DB0D03D2104ABF789970B',
-        '127.0.0.1', 'A7BCFA5D490B351BE0754130DF03A068F855DB4333D43921125B9CF2670EF6A40370C646B90401955E1F7BC9CDBF59CE0B2C5467D820BE189C845D0B79CFC96F'
-        // добавьте свой Домен и API-KEY сюда
-      ];
-      
-      CAPIWS.apikey(API_KEYS, function (event, data) {
-          console.log(data);
-          if (data.success) {
-              // Успешно - можно вызывать функции E-IMZO
+    var API_KEYS = [
+      'localhost', '96D0C1491615C82B9A54D9989779DF825B690748224C2B04F500F370D51827CE2644D8D4A82C18184D73AB8530BB8ED537269603F61DB0D03D2104ABF789970B',
+      '127.0.0.1', 'A7BCFA5D490B351BE0754130DF03A068F855DB4333D43921125B9CF2670EF6A40370C646B90401955E1F7BC9CDBF59CE0B2C5467D820BE189C845D0B79CFC96F'
+      // добавьте свой Домен и API-KEY сюда
+    ];
+    
+    CAPIWS.apikey(API_KEYS, function (event, data) {
+        console.log(data);
+        if (data.success) {
+            // Успешно - можно вызывать функции E-IMZO
 
-          } else {
-              // Ошибка - возможно API-KEY недействительный
-              window.alert(data.reason);
-          }
-      }, 
-      function(error){
-        // Ошибка WebSocket соединения
-        window.alert(error);
-      });
+        } else {
+            // Ошибка - возможно API-KEY недействительный
+            window.alert(data.reason);
+        }
+    }, 
+    function(error){
+      // Ошибка WebSocket соединения
+      window.alert(error);
+    });
 
 ## 1.2. Создание документа PKCS#7
 
@@ -186,7 +186,7 @@ HTTP 200 - означает успешное выполнение HTTP запр�
 
 `vpnKeyInfo` - Данные VPN-ключа.
 
-## 2.2. Описание методов
+## 2.2. Описание методов E-IMZO-SERVER
 
 E-IMZO-SERVER предоставляет REST-API методы к которым может обращаться Backend приложение или HTML/JavaScript приложение на прямую.
 
@@ -684,3 +684,19 @@ HTTP 200 - означает успешное выполнение HTTP запр�
 
 `pkcs7b64` - склеенный в один PKCS#7/Attached документ.
 
+## 2.3. Описание методов E-IMZO ID-CARD REST-API
+
+E-IMZO ID-CARD REST-API предоставляет REST-API методы к которым может обращаться Backend приложение, HTML/JavaScript приложение или Мобильное приложение.
+
+```sequence
+  participant Alice
+  participant Bob
+  Alice->>John: Hello John, how are you?
+  loop Healthcheck
+      John->>John: Fight against hypochondria
+  end
+  Note right of John: Rational thoughts <br/>prevail!
+  John-->>Alice: Great!
+  John->>Bob: How about you?
+  Bob-->>John: Jolly good!
+```
