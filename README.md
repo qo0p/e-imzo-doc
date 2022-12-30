@@ -3,7 +3,33 @@
 # E-IMZO - ИНСТРУКЦИЯ ПО ИНТЕГРАЦИИ
 
 ## 1. E-IMZO
-## 1.1. Создание документа PKCS#7
+
+## 1.1. Установка API-KEY для домена
+
+Перед вызовом функций E-IMZO необходимо установить API-KEY для домена (с которого выполняется вызов) при загрузки HTML-страницы (window.onload)
+
+      var API_KEYS = [
+        'localhost', '96D0C1491615C82B9A54D9989779DF825B690748224C2B04F500F370D51827CE2644D8D4A82C18184D73AB8530BB8ED537269603F61DB0D03D2104ABF789970B',
+        '127.0.0.1', 'A7BCFA5D490B351BE0754130DF03A068F855DB4333D43921125B9CF2670EF6A40370C646B90401955E1F7BC9CDBF59CE0B2C5467D820BE189C845D0B79CFC96F'
+        // добавьте свой Домен и API-KEY сюда
+      ];
+      
+      CAPIWS.apikey(API_KEYS, function (event, data) {
+          console.log(data);
+          if (data.success) {
+              // Успешно - можно вызывать функции E-IMZO
+
+          } else {
+              // Ошибка - возможно API-KEY недействительный
+              window.alert(data.reason);
+          }
+      }, 
+      function(error){
+        // Ошибка WebSocket соединения
+        window.alert(error);
+      });
+
+## 1.2. Создание документа PKCS#7
 
 Для создание документа [PKCS#7](https://www.rfc-editor.org/rfc/rfc2315) применяется функция [`create_pkcs7`](http://127.0.0.1:64646/apidoc.html#pkcs7.create_pkcs7)
 
