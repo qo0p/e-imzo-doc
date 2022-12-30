@@ -882,8 +882,7 @@ mobile.storage.redis.db=1
 
 Перезапустите E-IMZO-SERVER.
 
-Для проверки работоспособности REST-API `/frontend/mobile` выполните команду:
-(допустим что ваш домен example.uz)
+Для проверки работоспособности REST-API `/frontend/mobile` выполните команду (допустим что ваш домен example.uz):
 
 ```
 curl -X POST https://example.uz/frontend/mobile/auth
@@ -894,3 +893,204 @@ curl -X POST https://example.uz/frontend/mobile/auth
 ```
 {"status":1,"message":null,"siteId":"0000","documentId":"B7735734","challange":"AB8C2ED52B12DCBAB3FBD8C11007E4C0C7BF6A2F5818C05DEB61F3EE39052BDC"}
 ```
+
+## 3.4. Описание методов ID-CARD E-IMZO MOBILE REST-API
+
+### 3.4.1. `/frontend/mobile/upload`
+
+Метод нужен для того чтобы ИС “ID-CARD E-IMZO MOBILE” отправила PKCS#7 документ. 
+
+### 3.4.2. `/frontend/mobile/auth`
+
+Метод нужен для генерации случайного значение `Challenge` которое пользоваетль должен будет подписать и создать PKCS#7 документ.
+
+Пример вызова CURL командой:
+```
+curl -X POST -v http://127.0.0.1:8080/frontend/mobile/auth
+```
+Ответ
+```
+{
+  "status": 1,
+  "siteId": "0000",
+  "documentId": "2944F1F2",
+  "challange": "F8D2181DC6C02EA819B88FF3EF49BE0C"
+}
+```
+HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+
+HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+
+HTTP 200 - означает успешное выполнение HTTP запроса
+
+`status` - код состояния (1 - Успешно, иначе ошибка)
+
+`challenge` - случайного значение которое пользоваетль должен будет подписать и создать PKCS#7 документ с помощю E-IMZO ID-CARD.
+
+`siteId` - SiteID.
+
+`documentId` - DocumentID.
+
+`message` - если `status` не равно 1, то сообщения об ошибки.
+
+Для формирования Deeplink применяется Javascript-код https://test.e-imzo.uz/demo/eimzoidcard/js/e-imzo-mobile.js для веб-сайта или Dart-код https://github.com/qo0p/E-IMZO-INTEGRATION/blob/dev/lib/login_viewmodel.dart функция `deepLink()` для Flutter проекта.
+
+### 3.4.3. `/frontend/mobile/status`
+
+Метод нужен для проверки статуса после передачи по Deeplink.
+
+Пример вызова CURL командой:
+```
+curl -X POST -d 'documentId=BBF3E8C3' -v http://127.0.0.1:8080/frontend/mobile/status
+```
+
+Тело запроса должно содержать URL-закодированный пареметр `documentId`.
+
+Ответ
+```
+{
+  "status": 2
+}
+```
+HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+
+HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+
+HTTP 200 - означает успешное выполнение HTTP запроса
+
+`status` - код состояния (см. 3.2.3. Описание кода status).
+
+`message` - если `status` не равно 1, то сообщения об ошибки.
+
+### 3.4.4. `/backend/mobile/authenticate`
+
+Метод нужен для проверки результата идентификации пользователя со стороны Backend после того когда `/frontend/mobile/status` вернет  `{"status": 1}`.
+
+Пример вызова CURL командой:
+```
+curl -X GET -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -v http://127.0.0.1:8080/backend/mobile/authenticate/2944F1F2
+```
+
+В HTTP -заголовке  `X-Real-IP` - должен передаваться  IP-Адрес пользователя а в `Host` - должен передаваться доменное имя сайта куда пользователь выполяет Вход.
+
+Ответ:
+```
+{
+   "status":1,
+   "subjectCertificateInfo":{
+      "serialNumber":"7700000",
+      "X500Name":"CN\u003dIVANOV IVAN IVANOVICH,Name\u003dIVAN,SURNAME\u003dIVANOV,UID\u003d400000000,1.2.860.3.16.1.2\u003d30000000000000",
+      "subjectName":{
+         "UID":"400000000",
+         "SURNAME":"IVANOV",
+         "1.2.860.3.16.1.2":"30000000000000",
+         "CN":"IVANOV IVAN IVANOVICH",
+         "Name":"IVAN"
+      },
+      "validFrom":"2022-09-16 12:21:38",
+      "validTo":"2024-09-16 23:59:59"
+   }
+}
+```
+HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+
+HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+
+HTTP 200 - означает успешное выполнение HTTP запроса
+
+`status` - код состояния (1 - Успешно, иначе ошибка)
+
+`message` - если `status` не равно 1, то сообщения об ошибки.
+
+`subjectCertificateInfo` - информация о серитификате пользователя.
+
+### 3.4.5. `/frontend/mobile/sign`
+
+Метод нужен для генерации DocumentID для идентификации пользовательского документа, пользоваетль должен будет подписать и создать PKCS#7 документ.
+
+Пример вызова CURL командой:
+```
+curl -X POST -v http://127.0.0.1:8080/frontend/mobile/sign
+```
+Ответ
+```
+{
+  "status": 1,
+  "siteId": "0000",
+  "documentId": "850FF727"
+}
+```
+HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+
+HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+
+HTTP 200 - означает успешное выполнение HTTP запроса
+
+`status` - код состояния (1 - Успешно, иначе ошибка)
+
+`siteId` - SiteID.
+
+`documentId` - DocumentID.
+
+`message` - если `status` не равно 1, то сообщения об ошибки.
+
+Для формирования Deeplink применяется Javascript-код https://test.e-imzo.uz/demo/eimzoidcard/js/e-imzo-mobile.js для веб-сайта или Dart-код https://github.com/qo0p/E-IMZO-INTEGRATION/blob/dev/lib/login_viewmodel.dart функция `deepLink()` (вместо challenge нужно передат документ) для Flutter проекта.
+
+### 3.4.6. `/backend/mobile/verify`
+
+Метод нужен для проверки подписи документа пользователя со стороны Backend после того когда `/frontend/mobile/status` вернет  `{"status": 1}`.
+
+Пример вызова CURL командой:
+```
+curl -X POST -d 'documentId=850FF727&document=AAAAA...' -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -v http://127.0.0.1:8080/backend/mobile/verify
+```
+
+В HTTP -заголовке  `X-Real-IP` - должен передаваться  IP-Адрес пользователя а в `Host` - должен передаваться доменное имя сайта.
+
+Тело запроса должно содержать URL-закодированный пареметр `documentId` и `document` (Base64-закодированный документ пользователя).
+
+Ответ:
+```
+{
+   "status":1,
+   "subjectCertificateInfo":{
+      "serialNumber":"7700000",
+      "X500Name":"CN\u003dIVANOV IVAN IVANOVICH,Name\u003dIVAN,SURNAME\u003dIVANOV,UID\u003d400000000,1.2.860.3.16.1.2\u003d30000000000000",
+      "subjectName":{
+         "UID":"400000000",
+         "SURNAME":"IVANOV",
+         "1.2.860.3.16.1.2":"30000000000000",
+         "CN":"IVANOV IVAN IVANOVICH",
+         "Name":"IVAN"
+      },
+      "validFrom":"2022-09-16 12:21:38",
+      "validTo":"2024-09-16 23:59:59"
+   },
+   "verificationInfo":{
+      "policyIdentifiers":[
+         "1.2.860.3.2.2.1.2.1",
+         "1.2.860.3.2.2.1.2.2",
+         "1.2.860.3.2.2.1.2.3",
+         "1.2.860.3.2.2.1.2.4"
+      ],
+      "signingTime":"2022-12-30 12:36:12",
+      "timestampedTime":"2022-12-30 12:36:15"
+   },
+   "pkcs7Attached":"MIAGC.....AAAAA\u003d\u003d"
+}
+```
+HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+
+HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+
+HTTP 200 - означает успешное выполнение HTTP запроса
+
+`status` - код состояния (1 - Успешно, иначе ошибка)
+
+`message` - если `status` не равно 1, то сообщения об ошибки.
+
+`subjectCertificateInfo` - информация о серитификате пользователя.
+
+`verificationInfo` - доп. информация о проверке ЭЦП и сертивиката.
+
+`pkcs7Attached` - PKCS#7 Attached документ с штампом вермени. 
