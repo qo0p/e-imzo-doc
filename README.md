@@ -697,7 +697,7 @@ sequenceDiagram
   control "PHP" as backend
   lifeline "REST-API" as rest
   lifeline "ИС ID-CARD\nE-IMZO MOBILE" as api
-  }
+  
   user --> frontend "создает Document и нажимает кнопку “Подписать”"
   frontend --> rest "Ajax: POST /frontend/sign"
   activate rest
@@ -709,7 +709,7 @@ sequenceDiagram
   fragment loop "опрос состояния" {
   frontend --> rest "Ajax: POST /frontend/status"
   frontend <-- rest "{state: 2}"
-  }
+  
   frontend --> eimzo "QR-код (SiteID, DocumentID, хеш)"
   activate eimzo
   note right of eimzo "E-IMZO: декодирует QR-код"
@@ -734,7 +734,7 @@ sequenceDiagram
   fragment loop "опрос состояния" {
   frontend --> rest "Ajax: POST /frontend/status"
   frontend <-- rest "{state: 1}"
-  }
+  
   frontend --> backend "POST /upload/Document"
   activate backend
   backend --> rest "POST /backend/verify"
