@@ -688,7 +688,8 @@ HTTP 200 - означает успешное выполнение HTTP запр�
 
 E-IMZO ID-CARD REST-API предоставляет REST-API методы к которым может обращаться Backend приложение, HTML/JavaScript приложение или Мобильное приложение.
 
-```sequence
+```mermaid
+sequenceDiagram
   participant Alice
   participant Bob
   Alice->>John: Hello John, how are you?
