@@ -684,31 +684,49 @@ HTTP 200 - означает успешное выполнение HTTP запр�
 
 `pkcs7b64` - склеенный в один PKCS#7/Attached документ.
 
-## 2.3. Описание методов E-IMZO ID-CARD REST-API
+## 2.3. Описание методов ID-CARD E-IMZO MOBILE REST-API
 
 E-IMZO ID-CARD REST-API предоставляет REST-API методы к которым может обращаться Backend приложение, HTML/JavaScript приложение или Мобильное приложение.
 
 ```mermaid
 sequenceDiagram
-  actor "Пользователь" as user
-  participant "ID-карта" as idcard
-  participant "Моб.прил.\nE-IMZO" as eimzo
-  participant "HTML/JS/Моб.прил." as frontend
-  participant "PHP" as backend
-  participant "REST-API" as rest
-  participant "ИС ID-CARD\nE-IMZO MOBILE" as api
+  actor user as Пользователь
+  participant idcard as ID-карта
+  participant eimzo as Моб.прил. E-IMZO ID-CARD
+  participant frontend as Моб.прил.
+  participant backend as PHP Backend
+  participant rest as REST-API
+  participant api as ИС ID-CARD E-IMZO MOBILE
   
-  user --> frontend "создает Document и нажимает кнопку “Подписать”"
-  frontend --> rest "Ajax: POST /frontend/sign"
-  activate rest
-  rest -) "Redis"
-  rest --> frontend "{SiteID, DocumentID}"
-  deactivate rest
-  Note right of frontend "HTML/JS: формирует хеш от Document"
-  Note right of frontend "HTML/JS: формирует QR-код"
-  fragment loop "опрос состояния" {
-  frontend --> rest "Ajax: POST /frontend/status"
-  frontend <-- rest "{state: 2}"
-  
-  
+  user ->> frontend: создает Document и нажимает кнопку “Подписать”
+  frontend ->> rest: POST /frontend/mobile/sign
+  rest ->> frontend: {SiteID, DocumentID}
+  Note over frontend: формирует хеш от Document
+  loop опрос состояния
+    frontend ->> rest: POST /frontend/mobile/status
+    rest ->> frontend: {state: 2}
+  end
+  Note over frontend: формирует и открывает Deeplink
+  Note over frontend: происходит вызов Моб.прил. E-IMZO ID-CARD
+  frontend -->> eimzo: Deeplink (SiteID, DocumentID, хеш, CRC32)
+  Note over eimzo: декодирует Deeplink и извлекает SiteID, DocumentID, хеш
+  eimzo -->> user: запрос PIN-кода
+  user -->> eimzo: PIN-код
+  eimzo -->> idcard: PIN-код, хеш
+  Note over idcard : проверяет PIN-код и формирует ЭЦП
+  idcard -->> eimzo: ЭЦП, SerialNumber
+  eimzo ->> api: ЭЦП, SerialNumber, SiteID, DocumentID, хеш
+  Note over api: формирует документ PKCS7 Detached
+  Note over api: определяет UPLOAD URL по SiteID
+  api ->> rest: POST /frontend/mobile/upload PKCS7, DocumentID, SerialNumber
+  loop опрос состояния
+    frontend ->> rest: POST /frontend/mobile/status
+    rest ->> frontend: {state: 1}
+  end
+  frontend ->> backend: POST /upload/Document
+  backend ->> rest: POST /backend/mobile/verify
+  rest ->> backend: {status: 1, subjectCertificateInfo, verificationInfo}
+  backend ->> frontend: Данные пользователя и результата проверки ЭЦП
+  frontend -->> user: документ принят/не принят
+
 ```
