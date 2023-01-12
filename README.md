@@ -933,7 +933,10 @@ HTTP 200 - означает успешное выполнение HTTP запр�
 
 `message` - если `status` не равно 1, то сообщения об ошибки.
 
-Для формирования Deeplink применяется Javascript-код https://test.e-imzo.uz/demo/eimzoidcard/js/e-imzo-mobile.js для веб-сайта или Dart-код https://github.com/qo0p/E-IMZO-INTEGRATION/blob/dev/lib/login_viewmodel.dart функция `deepLink()` для Flutter проекта.
+Для формирования Deeplink применяется:
+- Javascript-код https://test.e-imzo.uz/demo/eimzoidcard/js/e-imzo-mobile.js для веб-сайта
+- Dart-код https://github.com/qo0p/E-IMZO-INTEGRATION/blob/dev/lib/login_viewmodel.dart функция `deepLink()` для Flutter проекта
+- Java-код https://github.com/qo0p/SampleAndroidAppCallDeeplinkEIMZO/blob/master/app/src/main/java/uz/yt/sample/myapplication/MainActivity.java функция `makeAndCallDeepLink()` для Android проекта
 
 ### 3.4.3. `/frontend/mobile/status`
 
@@ -1034,7 +1037,10 @@ HTTP 200 - означает успешное выполнение HTTP запр�
 
 `message` - если `status` не равно 1, то сообщения об ошибки.
 
-Для формирования Deeplink применяется Javascript-код https://test.e-imzo.uz/demo/eimzoidcard/js/e-imzo-mobile.js для веб-сайта или Dart-код https://github.com/qo0p/E-IMZO-INTEGRATION/blob/dev/lib/login_viewmodel.dart функция `deepLink()` (вместо challenge нужно передать документ) для Flutter проекта.
+Для формирования Deeplink применяется:
+- Javascript-код https://test.e-imzo.uz/demo/eimzoidcard/js/e-imzo-mobile.js для веб-сайта
+- Dart-код https://github.com/qo0p/E-IMZO-INTEGRATION/blob/dev/lib/login_viewmodel.dart функция `deepLink()` для Flutter проекта
+- Java-код https://github.com/qo0p/SampleAndroidAppCallDeeplinkEIMZO/blob/master/app/src/main/java/uz/yt/sample/myapplication/MainActivity.java функция `makeAndCallDeepLink()` для Android проекта
 
 ### 3.4.6. `/backend/mobile/verify`
 
