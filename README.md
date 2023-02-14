@@ -1112,8 +1112,8 @@ E-IMZO TUNNEL предназначен для установки зашифро�
 sequenceDiagram
   actor user as Пользователь
   participant frontend as HTML/JS
-  participant eimzo as E-IMZO
   participant proxy as Прокси
+  participant eimzo as E-IMZO
   participant backend as E-IMZO-SERVER
   participant api as WebSocket-API
   
