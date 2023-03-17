@@ -2,7 +2,7 @@
 
 ## Требования
 
-Для применения библиотеки подключите `e-imzo-server-client-1.0-SNAPSHOT.jar` и `gson-2.8.6.jar` к Java проекту.
+Для применения библиотеки подключите `e-imzo-server-client-1.2-SNAPSHOT.jar` и `gson-2.8.6.jar` к Java проекту.
 
 Импортируйте Java-классы
 
