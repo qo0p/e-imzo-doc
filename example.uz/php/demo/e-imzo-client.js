@@ -180,10 +180,9 @@ var EIMZOClient = {
         }
     },
     idCardIsPLuggedIn: function(success, fail){
-        var items = [];
-        var errors = [];
         if(!EIMZOClient.NEW_API2){
-            console.log("E-IMZO version should be 4.12 or newer")
+            console.log("E-IMZO version should be 4.12 or newer");
+	        success(false);
         } else {
             CAPIWS.callFunction({plugin: "idcard", name: "list_readers"}, function (event, data) {
                 if (data.success) {
