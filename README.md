@@ -900,6 +900,8 @@ curl -X POST https://example.uz/frontend/mobile/auth
 
 Метод нужен для того чтобы ИС “ID-CARD E-IMZO MOBILE” отправила PKCS#7 документ. 
 
+_Например: если название вашего домена_ `example.uz` _то ваш_ `UPLOAD URL` _будет_ `https://example.uz/frontend/mobile/upload`
+
 ### 3.4.2. `/frontend/mobile/auth`
 
 Метод нужен для генерации случайного значение `Challenge` которое пользоваетль должен будет подписать и создать PKCS#7 документ.
