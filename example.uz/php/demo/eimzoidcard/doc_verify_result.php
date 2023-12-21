@@ -7,7 +7,17 @@ $host = $_SERVER['HTTP_HOST'];
 
 $headers = array('Content-Type: application/x-www-form-urlencoded', 'Host: '.$host, 'X-Real-IP: '.$user_ip);
 
-$document=$_POST['Document'];
+$is_base64=false;
+$document="";
+if (isset($_POST['Document'])){
+  $is_base64=false;
+  $document=$_POST['Document'];
+} else if (isset($_POST['Document64'])){
+  $is_base64=true;
+  $document=$_POST['Document64'];
+} else {
+  die("POST Переменная Document или Document64 не передана");
+}
 if (strlen($document) > 128) {
 	die("Размер не должен превышать 128, т.к. это тест");
 }
@@ -20,7 +30,11 @@ $url = $verify_url;
 curl_setopt($ch,CURLOPT_URL,$url);
 curl_setopt($ch,CURLOPT_POST, 1);                //0 for a get request
 curl_setopt($ch,CURLOPT_HTTPHEADER, $headers);
-curl_setopt($ch,CURLOPT_POSTFIELDS,'documentId='.urlencode($_POST['documentId']).'&document='.urlencode(base64_encode($document)));
+if($is_base64){
+  curl_setopt($ch,CURLOPT_POSTFIELDS,'documentId='.urlencode($_POST['documentId']).'&document='.urlencode($document));
+} else {
+  curl_setopt($ch,CURLOPT_POSTFIELDS,'documentId='.urlencode($_POST['documentId']).'&document='.urlencode(base64_encode($document)));
+}
 curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch,CURLOPT_CONNECTTIMEOUT ,3);
 curl_setopt($ch,CURLOPT_TIMEOUT, 20);
