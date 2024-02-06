@@ -185,7 +185,7 @@ unset($_SESSION["USER_INFO"]);
             };
 
             getChallenge = function (callback){
-                microAjax('/frontend/challenge', function (data, s) {
+                microAjax('/frontend/challenge?_uc='+(Date.now() + "_" + Math.random()), function (data, s) {
                     if(s.status != 200){
                         uiShowMessage(s.status + " - " + s.statusText);
                         return;
