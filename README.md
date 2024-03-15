@@ -70,14 +70,14 @@
 
 ## 2. E-IMZO-SERVER
 
-E-IMZO-SERVER - ПО предназначека для Аутентификации пользователя по ЭЦП и Проверки подписи PKCS#7 документа. 
+E-IMZO-SERVER - ПО предназначена для Аутентификации пользователя по ЭЦП и Проверки подписи PKCS#7 документа. 
 
 ## 2.1. Запуск и настройка
 
 Для запуска требуется:
  - JRE v1.8. (update 322) (Docker image: `openjdk:8u322-oraclelinux8`)
  - Интернет соединение до сервера `vpn.e-imzo.uz:3443` (`testvpn.e-imzo.uz:2443` для тестирования) (сервера доступны только из Узбекистана).
- - Файлы конфигурации и VPN-ключи.
+ - Файлы конфигурации и VPN-ключи (могут быть в отдельном zip файле, извлеките их в директорию где находится e-imzo-server.jar).
 
 Запуск выполняется командой:
 
@@ -767,9 +767,9 @@ sequenceDiagram
   actor user as Пользователь
   participant idcard as ID-карта
   participant eimzo as Моб.прил. E-IMZO ID-CARD
-  participant frontend as Моб.прил.
-  participant backend as PHP Backend
-  participant rest as REST-API
+  participant frontend as Ваше Моб.прил.
+  participant backend as Ваш PHP Backend
+  participant rest as REST-API e-imzo-server
   participant api as ИС ID-CARD E-IMZO MOBILE
   
   user ->> frontend: нажимает кнопку “Вход”
@@ -778,7 +778,7 @@ sequenceDiagram
   Note over frontend: формирует хеш от Challenge
   loop опрос состояния
     frontend ->> rest: POST /frontend/mobile/status
-    rest ->> frontend: {state: 2}
+    rest ->> frontend: {status: 2}
   end
   Note over frontend: формирует и открывает Deeplink
   Note over frontend: происходит вызов Моб.прил. E-IMZO ID-CARD
@@ -795,7 +795,7 @@ sequenceDiagram
   api ->> rest: POST /frontend/mobile/upload PKCS7, DocumentID, SerialNumber
   loop опрос состояния
     frontend ->> rest: POST /frontend/mobile/status
-    rest ->> frontend: {state: 1}
+    rest ->> frontend: {status: 1}
   end
   frontend ->> backend: запрос результата проверки
   backend ->> rest: POST /backend/mobile/authenticate/{DocumentID}
@@ -813,9 +813,9 @@ sequenceDiagram
   actor user as Пользователь
   participant idcard as ID-карта
   participant eimzo as Моб.прил. E-IMZO ID-CARD
-  participant frontend as Моб.прил.
-  participant backend as PHP Backend
-  participant rest as REST-API
+  participant frontend as Ваше Моб.прил.
+  participant backend as Ваш PHP Backend
+  participant rest as REST-API e-imzo-server
   participant api as ИС ID-CARD E-IMZO MOBILE
   
   user ->> frontend: создает Document и нажимает кнопку “Подписать”
@@ -824,7 +824,7 @@ sequenceDiagram
   Note over frontend: формирует хеш от Document
   loop опрос состояния
     frontend ->> rest: POST /frontend/mobile/status
-    rest ->> frontend: {state: 2}
+    rest ->> frontend: {status: 2}
   end
   Note over frontend: формирует и открывает Deeplink
   Note over frontend: происходит вызов Моб.прил. E-IMZO ID-CARD
@@ -841,7 +841,7 @@ sequenceDiagram
   api ->> rest: POST /frontend/mobile/upload PKCS7, DocumentID, SerialNumber
   loop опрос состояния
     frontend ->> rest: POST /frontend/mobile/status
-    rest ->> frontend: {state: 1}
+    rest ->> frontend: {status: 1}
   end
   frontend ->> backend: POST /upload/Document
   backend ->> rest: POST /backend/mobile/verify
