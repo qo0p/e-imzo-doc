@@ -29,6 +29,8 @@
       window.alert(error);
     });
 
+Смотрите пример [`e-imzo-init.js`](blob/master/example.uz/php/demo/e-imzo-init.js)
+
 ## 1.2. Создание документа PKCS#7
 
 Для создание документа [PKCS#7](https://www.rfc-editor.org/rfc/rfc2315) применяется функция [`create_pkcs7`](http://127.0.0.1:64646/apidoc.html#pkcs7.create_pkcs7)
