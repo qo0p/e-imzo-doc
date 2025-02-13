@@ -29,7 +29,7 @@
       window.alert(error);
     });
 
-Смотрите пример [`e-imzo-init.js`](example.uz/php/demo/e-imzo-init.js)
+Смотрите пример [`e-imzo-init.js`](example.uz/php/demo/e-imzo-init.js) функция `AppLoad`.
 
 ## 1.2. Создание документа PKCS#7
 
@@ -68,7 +68,9 @@
  - Если нужно подписать ключем PFX, то `id` нужно получить из функции `load_key`
  - Если нужно подписать ключем ID-карты, то `id` = `"idcard"`
 
-Смотрите пример https://test.e-imzo.uz/demo/
+Смотрите пример [`e-imzo-client.js`](example.uz/php/demo/e-imzo-client.js) функция `createPkcs7`.
+Смотрите пример [`index.php`](example.uz/php/demo/index.php) функция `auth`.
+Смотрите пример [`cabinet.php`](example.uz/php/demo/cabinet.php) функция `sign` и `signFile`.
 
 ## 2. E-IMZO-SERVER
 
@@ -278,7 +280,7 @@ HTTP 200 - означает успешное выполнение HTTP запр�
 
 *ВАЖНО ! Ответ не должен кешироваться в прокси или web-сервере.*
 
-Смотрите пример http://test.e-imzo.uz/demo/
+Смотрите пример [`index.php`](example.uz/php/demo/index.php) функция `getChallenge`.
 
 ### 2.2.2. `/backend/auth`
 
@@ -332,7 +334,7 @@ HTTP 200 - означает успешное выполнение HTTP запр�
 `subjectCertificateInfo` - информация о серитификате пользователя.
 
 
-Смотрите пример http://test.e-imzo.uz/demo/
+Смотрите пример [`auth.php`](example.uz/php/demo/auth.php).
 
 ### 2.2.3. `/frontend/timestamp/pkcs7`
 
@@ -379,7 +381,7 @@ HTTP 200 - означает успешное выполнение HTTP запр�
 
 `pkcs7b64` - PKCS#7 документ с прикрепленным токеном штампа времени.
 
-Смотрите пример http://test.e-imzo.uz/demo/
+Смотрите пример [`cabinet.php`](example.uz/php/demo/cabinet.php) функция `attachTimestamp`.
 
 ### 2.2.4. `/backend/pkcs7/verify/attached`
 
@@ -624,7 +626,7 @@ HTTP 200 - означает успешное выполнение HTTP запр�
 | 1.2.860.3.16.1.2 | ПИНФЛ |
 | 1.2.860.3.16.1.1 | Юр.ИНН (поле отсутствует если субъект является физ. лицом) |
 
-Смотрите пример http://test.e-imzo.uz/demo/
+Смотрите пример [`verify.php`](example.uz/php/demo/verify.php).
 
 ### 2.2.5. `/backend/pkcs7/verify/detached`
 
@@ -640,7 +642,7 @@ curl -v -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -X POST -d 'c29tZ...VudA==
 
 Ответ такой же как в методе `/backend/pkcs7/verify/attached` но json не содержит поле `pkcs7Info.documentBase64`.
 
-Смотрите пример http://test.e-imzo.uz/demo/
+Смотрите пример [`verify.php`](example.uz/php/demo/verify.php).
 
 ### 2.2.6. `/frontend/pkcs7/make-attached`
 
