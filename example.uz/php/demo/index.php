@@ -19,7 +19,7 @@ unset($_SESSION["USER_INFO"]);
     <body>
         <form name="testform">
             <label id="message" style="color: red;"></label>
-            <p>Выберите тип ключа:</p>
+            <p>Выберите тип ключа: (работает только с тестовыми ключами)</p>
             <input type="radio" id="pfx" name="keyType" value="pfx" onchange="keyType_changed()" checked="checked">
             <label for="pfx">PFX</label> - <select name="key" onchange="cbChanged(this)"></select><br>
             <input type="radio" id="idcard" name="keyType" value="idcard" onchange="keyType_changed()">

@@ -93,7 +93,7 @@ extension=curl
 
 ## 4. E-IMZO-SERVER
 
-Распакуйте `e-imzo-server-v1.9.0.zip` в `c:\` диск
+Распакуйте `e-imzo-server-v1.9.1.zip` в `c:\` диск
 
 Откройте `test-example.uz-2024-12-31.zip` в котором есть папка `keys` (VPN-ключи) и файл `test-config.properties` (файл конфигурации) и скопируйте их в папку `c:\e-imzo-server`
 

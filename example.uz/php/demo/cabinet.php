@@ -30,13 +30,18 @@ session_start();
         <form name="testform">
             <label id="message" style="color: red;"></label>
             <br />
-            Текст для подписи <br />
-            <textarea name="data"></textarea><br />
             <p>Выберите тип подписанного документа:</p>
             <input type="radio" id="attached" name="pkcs7Type" value="attached" onchange="pkcs7Type_changed()" checked="checked"><label for="attached">PKCS#7/Attached</label><br />
             <input type="radio" id="detached" name="pkcs7Type" value="detached" onchange="pkcs7Type_changed()"><label for="detached">PKCS#7/Detached</label><br>
             <br />
-            <button onclick="sign()" type="button" id="signButton">Подписать</button><br />
+            Текст для подписи <br />
+            <textarea name="data"></textarea><br />
+            <button onclick="sign()" type="button" id="signButton">Подписать Текст</button><br />
+            <br />
+            Файл для подписи <br />
+            <input type="file" id="fileInput" accept="*/*"><br />
+            <textarea name="fileData64"></textarea><br />
+            <button onclick="signFile()" type="button" id="signFileButton">Подписать Файл</button><br />
             <label id="progress"></label>
             <br />
             ID ключа: <label id="keyId"><?=$_SESSION["KEY_ID"]?></label><br />
@@ -49,6 +54,25 @@ session_start();
        </form>
 
         <script language="javascript">
+
+            // Function to handle file input change event
+            document.getElementById('fileInput').addEventListener('change', function(event) {
+                const file = event.target.files[0]; // Get the uploaded file
+
+                if (file) {
+                    const reader = new FileReader(); // Create a new FileReader
+
+                    // When the file is loaded, convert to Base64 and log it
+                    reader.onload = function(e) {
+                        const base64Content = e.target.result.split(',')[1]; // Extract Base64 part
+                        document.testform.fileData64.value = base64Content;
+                    };
+
+                    // Read the file as a data URL (Base64 encoding)
+                    reader.readAsDataURL(file);
+                }
+            });
+
 
             var pkcs7Type_changed = function(){
                 var pkcs7Type = document.testform.pkcs7Type.value;
@@ -120,6 +144,23 @@ session_start();
                 }, uiHandleError, pkcs7Type==="detached");
             };  
 
+            signFile = function () {
+                uiShowProgress();
+                var pkcs7Type = document.testform.pkcs7Type.value;
+                var data64 = document.testform.fileData64.value;
+                var keyId = document.getElementById('keyId').innerHTML;   
+
+                EIMZOClient.createPkcs7(keyId, data64, null, function(pkcs7){
+                    attachTimestamp(pkcs7, function(pkcs7wtst){
+                        document.testform.pkcs7.value = pkcs7wtst;
+                        uiShowProgress();
+                        verify(pkcs7wtst, pkcs7Type==="detached", data64, function(result){
+                            document.testform.verifyResult.value = JSON.stringify(result,'',' ');
+                        }, true);  // !! set isDataBase64Encoded = TRUE
+                    });
+                }, uiHandleError, pkcs7Type==="detached", true); // !! set isDataBase64Encoded = TRUE
+            };  
+
             attachTimestamp = function (pkcs7, callback){
                 microAjax('/frontend/timestamp/pkcs7', function (data, s) {
                     uiHideProgress();
@@ -142,10 +183,14 @@ session_start();
                 },pkcs7);
             }
 
-            verify = function (pkcs7wtst, detached, data, callback){    
+            verify = function (pkcs7wtst, detached, data, callback, isDataBase64Encoded){    
                 var data64;
                 if(detached){
-                    data64 = Base64.encode(data);
+                    if(isDataBase64Encoded === true){
+                        data64 = data;
+                    } else {
+                        data64 = Base64.encode(data);
+                    }
                 }            
                 microAjax('verify.php', function (data, s) {
                     uiHideProgress();
