@@ -69,7 +69,9 @@
  - Если нужно подписать ключем ID-карты, то `id` = `"idcard"`
 
 Смотрите пример [`e-imzo-client.js`](example.uz/php/demo/e-imzo-client.js) функция `createPkcs7`.
+
 Смотрите пример [`index.php`](example.uz/php/demo/index.php) функция `auth`.
+
 Смотрите пример [`cabinet.php`](example.uz/php/demo/cabinet.php) функция `sign` и `signFile`.
 
 ## 2. E-IMZO-SERVER
