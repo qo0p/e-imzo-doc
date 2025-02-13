@@ -29,7 +29,7 @@
       window.alert(error);
     });
 
-Смотрите пример [`e-imzo-init.js`](blob/master/example.uz/php/demo/e-imzo-init.js)
+Смотрите пример [`e-imzo-init.js`](example.uz/php/demo/e-imzo-init.js)
 
 ## 1.2. Создание документа PKCS#7
 
