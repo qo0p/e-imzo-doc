@@ -2,6 +2,95 @@
 
 # E-IMZO - ИНСТРУКЦИЯ ПО ИНТЕГРАЦИИ
 
+# 0. Принцип работы
+
+Демо сайт и пример https://test.e-imzo.uz/demo/
+
+## 0.1. Идентификация Пользователя
+
+Последовательность операций для выполнения идентификации по ЭЦП:
+
+```mermaid
+sequenceDiagram
+  actor user as Пользователь
+  participant key as ЭЦП-ключ
+  participant eimzo as E-IMZO.exe
+  participant frontend as Ваш сайт
+  participant backend as Ваш PHP Backend
+  participant rest as REST-API e-imzo-server
+  participant vpn as vpn.e-imzo.uz
+
+  user ->> frontend: Открывает страницу входа на сайт
+  frontend ->> eimzo: list_all_keys()
+  eimzo ->> frontend: Cписок ЭЦП-ключей
+  frontend ->> user: отображает список ЭЦП-ключей
+  user ->> frontend: Выберает ЭЦП-ключ и нажимает кнопку “Вход”
+  frontend ->> eimzo: load_key()
+  eimzo ->> frontend: keyID (временно-уникальный идентификатор ЭЦП-ключа)
+  frontend ->> rest: POST /frontend/challenge
+  Note over rest: Создает временно-уникальный Challenge и сохраняет в временной памяти
+  rest ->> frontend: {Challenge}  
+  frontend ->> eimzo: create_pkcs7 (keyID, Challenge)  
+  eimzo -->> user: запрос Пароля
+  user -->> eimzo: Пароль
+  eimzo ->> key: Расшифровать паролем закрытый ключ ЭЦП
+  key ->> eimzo: Закрытый ключ ЭЦП  
+  Note over eimzo: формирует документ PKCS7 подписав Challenge закрытым ключом ЭЦП
+  eimzo ->> frontend: PKCS7 документ  
+  frontend ->> backend: PKCS7 документ  
+  backend ->> rest: POST /backend/auth {PKCS7}
+  Note over rest: Проверяет подпись документа PKCS7
+  Note over rest: Сверяет Challenge из временной памяти с Challenge из PKCS7
+  Note over rest: Удаляет Challenge из временной памяти
+  rest -->> vpn: Запрос статуса сертификата ключа Пользователя
+  vpn -->> rest: Статус сертификата ключа Пользователя: Активен
+  rest ->> backend: {status: 1, subjectCertificateInfo}
+  Note over backend: Проверяет права и роль Пользователя
+  Note over backend: Устанавливает сессию
+  backend ->> frontend: Перенаправляет пользователя на страницу персонального кабинета
+
+```
+## 0.2. Подписание документа
+
+Последовательность операций для подписания электронного документа:
+
+```mermaid
+sequenceDiagram
+  actor user as Пользователь
+  participant key as ЭЦП-ключ
+  participant eimzo as E-IMZO.exe
+  participant frontend as Ваш сайт
+  participant backend as Ваш PHP Backend
+  participant rest as REST-API e-imzo-server
+  participant vpn as vpn.e-imzo.uz
+
+  user ->> frontend: Формирует Document для подписания и нажимает кнопку “Подписать”
+  frontend ->> eimzo: create_pkcs7 (keyID, Document) 
+  eimzo -->> user: запрос Пароля
+  user -->> eimzo: Пароль
+  eimzo ->> key: Расшифровать паролем закрытый ключ ЭЦП
+  key ->> eimzo: Закрытый ключ ЭЦП  
+  Note over eimzo: формирует документ PKCS7 подписав Document закрытым ключом ЭЦП
+  eimzo ->> frontend: PKCS7 документ 
+  frontend ->> rest: POST /frontend/timestamp/pkcs7 {PKCS7}
+  rest -->> vpn: Запрос Timestamp
+  vpn -->> rest: Timestamp
+  Note over rest: Прикрепляет Timestamp к PKCS7
+  rest ->> frontend: PKCS7+Timestamp 
+  frontend ->> backend: PKCS7+Timestamp документ
+  backend ->> rest: POST /backend/pkcs7/verify/attached {PKCS7+Timestamp}
+  Note over rest: Проверяет подпись документа PKCS7+Timestamp
+  rest -->> vpn: Запрос статуса сертификата ключа Пользователя
+  vpn -->> rest: Статус сертификата ключа Пользователя: Активен
+
+  rest ->> backend: {status: 1, pkcs7Info}
+  Note over backend: Проверяет права и роль Пользователя
+  Note over backend: Извлекает Document из pkcs7Info и выполняет дополнительную проверку
+  Note over backend: Сохраняет PKCS7+Timestamp, pkcs7Info в архиве
+  backend ->> frontend: Сообщение Пользователю "Подписанный Document принят"
+
+```
+
 # 1. E-IMZO
 
 ## 1.1. Установка API-KEY для домена
