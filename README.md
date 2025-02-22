@@ -1,208 +1,206 @@
 
 
-# E-IMZO - ИНСТРУКЦИЯ ПО ИНТЕГРАЦИИ
+# E-IMZO integratsiya bo‘yicha qo‘llanma
 
-# 0. Принцип работы
+# 0. Ishlash prinsipi
 
-Демо сайт и пример https://test.e-imzo.uz/demo/
+Demo sayt va namuna: https://test.e-imzo.uz/demo/
 
-## 0.1. Идентификация Пользователя
+## 0.1. Foydalanuvchini identifikatsiya qilish
 
-Последовательность операций для выполнения идентификации по ЭЦП:
+Elektron raqamli imzo (ERI) orqali identifikatsiya qilish tartibi:
 
 ```mermaid
 sequenceDiagram
-  actor user as Пользователь
-  participant key as ЭЦП-ключ
-  participant eimzo as E-IMZO.exe
-  participant frontend as Ваш сайт
-  participant backend as Ваш PHP Backend
-  participant rest as REST-API e-imzo-server
-  participant vpn as vpn.e-imzo.uz
+actor user as Foydalanuvchi
+participant key as ERI-kalit
+participant eimzo as E-IMZO.exe
+participant frontend as Sizning sayt
+participant backend as Sizning PHP Backend
+participant rest as REST-API e-imzo-server
+participant vpn as vpn.e-imzo.uz
 
-  user ->> frontend: Открывает страницу входа на сайт
-  frontend ->> eimzo: list_all_keys()
-  eimzo ->> frontend: Cписок ЭЦП-ключей
-  frontend ->> user: отображает список ЭЦП-ключей
-  user ->> frontend: Выберает ЭЦП-ключ и нажимает кнопку “Вход”
-  frontend ->> eimzo: load_key()
-  eimzo ->> frontend: keyID (временно-уникальный идентификатор ЭЦП-ключа)
-  frontend ->> rest: POST /frontend/challenge
-  Note over rest: Создает временно-уникальный Challenge и сохраняет в временной памяти
-  rest ->> frontend: {Challenge}  
-  frontend ->> eimzo: create_pkcs7 (keyID, Challenge)  
-  eimzo -->> user: запрос Пароля
-  user -->> eimzo: Пароль
-  eimzo ->> key: Расшифровать паролем закрытый ключ ЭЦП
-  key ->> eimzo: Закрытый ключ ЭЦП  
-  Note over eimzo: формирует документ PKCS7 подписав Challenge закрытым ключом ЭЦП
-  eimzo ->> frontend: PKCS7 документ  
-  frontend ->> backend: PKCS7 документ  
-  backend ->> rest: POST /backend/auth {PKCS7}
-  Note over rest: Проверяет подпись документа PKCS7
-  Note over rest: Сверяет Challenge из временной памяти с Challenge из PKCS7
-  Note over rest: Удаляет Challenge из временной памяти
-  rest -->> vpn: Запрос статуса сертификата ключа Пользователя
-  vpn -->> rest: Статус сертификата ключа Пользователя: Активен
-  rest ->> backend: {status: 1, subjectCertificateInfo}
-  Note over backend: Проверяет права и роль Пользователя
-  Note over backend: Устанавливает сессию
-  backend ->> frontend: Перенаправляет пользователя на страницу персонального кабинета
-
+user ->> frontend: Saytga kirish sahifasini ochadi
+frontend ->> eimzo: list_all_keys()
+eimzo ->> frontend: ERI-kalitlar ro‘yxati
+frontend ->> user: ERI-kalitlar ro‘yxatini ko‘rsatadi
+user ->> frontend: ERI-kalitni tanlaydi va “Kirish” tugmasini bosadi
+frontend ->> eimzo: load_key()
+eimzo ->> frontend: keyID (muddati cheklangan, noyob ERI-kalit identifikatori)
+frontend ->> rest: POST /frontend/challenge
+Note over rest: Vaqtinchalik noyob Challenge yaratadi va vaqtinchalik xotirada saqlaydi
+rest ->> frontend: {Challenge}  
+frontend ->> eimzo: create_pkcs7 (keyID, Challenge)  
+eimzo -->> user: Parol so‘rovi
+user -->> eimzo: Parol
+eimzo ->> key: Parol yordamida ERI yopiq kalitini shifrdan chiqarish
+key ->> eimzo: ERI yopiq kaliti  
+Note over eimzo: PKCS7 hujjatini yaratadi va Challenge’ni ERI yopiq kaliti bilan imzolaydi
+eimzo ->> frontend: PKCS7 hujjati  
+frontend ->> backend: PKCS7 hujjati  
+backend ->> rest: POST /backend/auth {PKCS7}
+Note over rest: PKCS7 hujjati imzosini tekshiradi
+Note over rest: Vaqtinchalik xotiradagi Challenge’ni PKCS7’dagi Challenge bilan taqqoslaydi
+Note over rest: Challenge’ni vaqtinchalik xotiradan o‘chiradi
+rest -->> vpn: Foydalanuvchining kalit sertifikati holati bo‘yicha so‘rov
+vpn -->> rest: Foydalanuvchining kalit sertifikati holati: Faol
+rest ->> backend: {status: 1, subjectCertificateInfo}
+Note over backend: Foydalanuvchi huquqlari va rolini tekshiradi
+Note over backend: Sessiyani o‘rnatadi
+backend ->> frontend: Foydalanuvchini shaxsiy kabinet sahifasiga yo‘naltiradi
 ```
-## 0.2. Подписание документа
+## 0.2. Hujjatni imzolash
 
-Последовательность операций для подписания электронного документа:
+Elektron hujjatni imzolash tartibi:
 
 ```mermaid
 sequenceDiagram
-  actor user as Пользователь
-  participant key as ЭЦП-ключ
+  actor user as Foydalanuvchi
+  participant key as ERI-kalit
   participant eimzo as E-IMZO.exe
-  participant frontend as Ваш сайт
-  participant backend as Ваш PHP Backend
+  participant frontend as Sizning sayt
+  participant backend as Sizning PHP Backend
   participant rest as REST-API e-imzo-server
   participant vpn as vpn.e-imzo.uz
 
-  user ->> frontend: Формирует Document для подписания и нажимает кнопку “Подписать”
+  user ->> frontend: Imzolash uchun hujjat (Document) yaratadi va “Imzolash” tugmasini bosadi
   frontend ->> eimzo: create_pkcs7 (keyID, Document) 
-  eimzo -->> user: запрос Пароля
-  user -->> eimzo: Пароль
-  eimzo ->> key: Расшифровать паролем закрытый ключ ЭЦП
-  key ->> eimzo: Закрытый ключ ЭЦП  
-  Note over eimzo: формирует документ PKCS7 подписав Document закрытым ключом ЭЦП
-  eimzo ->> frontend: PKCS7 документ 
+  eimzo -->> user: Parol so‘rovi
+  user -->> eimzo: Parol
+  eimzo ->> key: Parol yordamida ERI yopiq kalitini shifrdan chiqarish
+  key ->> eimzo: ERI yopiq kaliti  
+  Note over eimzo: PKCS7 hujjatini yaratadi va Document’ni ERI yopiq kaliti bilan imzolaydi
+  eimzo ->> frontend: PKCS7 hujjati 
   frontend ->> rest: POST /frontend/timestamp/pkcs7 {PKCS7}
-  rest -->> vpn: Запрос Timestamp
+  rest -->> vpn: Timestamp so‘rovi
   vpn -->> rest: Timestamp
-  Note over rest: Прикрепляет Timestamp к PKCS7
+  Note over rest: Timestamp’ni PKCS7’ga qo‘shadi
   rest ->> frontend: PKCS7+Timestamp 
-  frontend ->> backend: PKCS7+Timestamp документ
+  frontend ->> backend: PKCS7+Timestamp hujjati
   backend ->> rest: POST /backend/pkcs7/verify/attached {PKCS7+Timestamp}
-  Note over rest: Проверяет подпись документа PKCS7+Timestamp
-  rest -->> vpn: Запрос статуса сертификата ключа Пользователя
-  vpn -->> rest: Статус сертификата ключа Пользователя: Активен
+  Note over rest: PKCS7+Timestamp hujjati imzosini tekshiradi
+  rest -->> vpn: Foydalanuvchining kalit sertifikati holati bo‘yicha so‘rov
+  vpn -->> rest: Foydalanuvchining kalit sertifikati holati: Faol
 
   rest ->> backend: {status: 1, pkcs7Info}
-  Note over backend: Проверяет права и роль Пользователя
-  Note over backend: Извлекает Document из pkcs7Info и выполняет дополнительную проверку
-  Note over backend: Сохраняет PKCS7+Timestamp, pkcs7Info в архиве
-  backend ->> frontend: Сообщение Пользователю "Подписанный Document принят"
+  Note over backend: Foydalanuvchi huquqlari va rolini tekshiradi
+  Note over backend: pkcs7Info’dan Document’ni ajratib oladi va qo‘shimcha tekshiruvni amalga oshiradi
+  Note over backend: PKCS7+Timestamp va pkcs7Info’ni arxivga saqlaydi
+  backend ->> frontend: Foydalanuvchiga “Imzolangan hujjat qabul qilindi” xabarini ko‘rsatadi
 
 ```
 
 # 1. E-IMZO
 
-## 1.1. Установка API-KEY для домена
+## 1.1. Domen uchun API-KEY o‘rnatish
 
-Перед вызовом функций E-IMZO необходимо установить API-KEY для домена (с которого выполняется вызов) при загрузки HTML-страницы (window.onload)
+E-IMZO funksiyalaridan foydalanishdan oldin, HTML sahifasi yuklanganda (window.onload) chaqirish amalga oshirilayotgan domen uchun API-KEY o‘rnatish kerak.
 
     var API_KEYS = [
       'localhost', '96D0C1491615C82B9A54D9989779DF825B690748224C2B04F500F370D51827CE2644D8D4A82C18184D73AB8530BB8ED537269603F61DB0D03D2104ABF789970B',
       '127.0.0.1', 'A7BCFA5D490B351BE0754130DF03A068F855DB4333D43921125B9CF2670EF6A40370C646B90401955E1F7BC9CDBF59CE0B2C5467D820BE189C845D0B79CFC96F'
-      // добавьте свой Домен и API-KEY сюда
+      // O‘z domeningiz va API-KEY’ni shu yerga qo‘shing
     ];
     
     CAPIWS.apikey(API_KEYS, function (event, data) {
         console.log(data);
         if (data.success) {
-            // Успешно - можно вызывать функции E-IMZO
+            // Muvaffaqiyatli - E-IMZO funksiyalarini chaqirish mumkin
 
         } else {
-            // Ошибка - возможно API-KEY недействительный
+            // Xatolik - ehtimol API-KEY yaroqsiz
             window.alert(data.reason);
         }
     }, 
     function(error){
-      // Ошибка WebSocket соединения
+      // WebSocket ulanishida xatolik
       window.alert(error);
     });
 
-Смотрите пример [`e-imzo-init.js`](example.uz/php/demo/e-imzo-init.js) функция `AppLoad`.
+Misol uchun [`e-imzo-init.js`](example.uz/php/demo/e-imzo-init.js) faylidagi `AppLoad` funksiyasiga qarang.
 
-## 1.2. Создание документа PKCS#7
+## 1.2. PKCS#7 hujjatini yaratish
 
-Для создание документа [PKCS#7](https://www.rfc-editor.org/rfc/rfc2315) применяется функция [`create_pkcs7`](http://127.0.0.1:64646/apidoc.html#pkcs7.create_pkcs7)
+[PKCS#7](https://www.rfc-editor.org/rfc/rfc2315) hujjatini yaratish uchun [`create_pkcs7`](http://127.0.0.1:64646/apidoc.html#pkcs7.create_pkcs7) funksiyasidan foydalaniladi.
 
     CAPIWS.callFunction({
         plugin    :"pkcs7",
         name      :"create_pkcs7",
         arguments :[
-          //Данные в кодировке BASE64 (будут предваритьльно декодированы, подписаны и вложены в документ)
+          // BASE64 kodlash formatidagi ma'lumotlar (oldindan dekodlanadi, imzolanadi va hujjatga qo‘shiladi)
           data_64,
-          //Идентификатор ключа подписывающего лица (полученный из фукнции других плагинов)
+          // Imzo qo‘yuvchi kalitning identifikatori (boshqa plagin funksiyalaridan olingan)
           id,
-          //Возможные значения: 'yes' - будет создан PKCS#7/CMS документ без вложения исходных данных, 'no' или '' - будет создан PKCS#7/CMS документ с вложением исходных данных
+          // Mumkin bo‘lgan qiymatlar: 'yes' - PKCS#7/CMS hujjati asl ma'lumotlarsiz yaratiladi, 'no' yoki '' - PKCS#7/CMS hujjati asl ma'lumotlar bilan yaratiladi
           detached
         ]
       },
       function(event, data){
         console.log(data);
         if (data.success) {
-          // Успешно
+          // Muvaffaqiyatli
           var pkcs7 = data.pkcs7_64;
                 
         } else {
-          // Ошибка обработки в E-IMZO
+          // E-IMZO ishlov berishida xatolik
           window.alert(data.reason);
         }
       },
       function(error){
-        // Ошибка WebSocket соединения
+        // WebSocket ulanishida xatolik
         window.alert(error);
       }
     );
 
-Параметр `id`:
- - Если нужно подписать ключем PFX, то `id` нужно получить из функции `load_key`
- - Если нужно подписать ключем ID-карты, то `id` = `"idcard"`
+`id` parametri:
+ - Agar PFX kaliti bilan imzolash kerak bo‘lsa, `id` funksiyasi `load_key` dan olinadi.
+ - Agar ID-karta kaliti bilan imzolash kerak bo‘lsa, `id` = `"idcard"`.
 
-Смотрите пример [`e-imzo-client.js`](example.uz/php/demo/e-imzo-client.js) функция `createPkcs7`.
-
-Смотрите пример [`index.php`](example.uz/php/demo/index.php) функция `auth`.
-
-Смотрите пример [`cabinet.php`](example.uz/php/demo/cabinet.php) функция `sign` и `signFile`.
+Misollar:
+ - [`e-imzo-client.js`](example.uz/php/demo/e-imzo-client.js) faylidagi `createPkcs7` funksiyasiga qarang.
+ - [`index.php`](example.uz/php/demo/index.php) faylidagi `auth` funksiyasiga qarang.
+ - [`cabinet.php`](example.uz/php/demo/cabinet.php) faylidagi `sign` va `signFile` funksiyalariga qarang.
 
 ## 2. E-IMZO-SERVER
 
-E-IMZO-SERVER - ПО предназначена для Аутентификации пользователя по ЭЦП и Проверки подписи PKCS#7 документа. 
+E-IMZO-SERVER - bu dasturiy ta’minot bo‘lib, foydalanuvchini E-IMZO orqali autentifikatsiya qilish va PKCS#7 hujjat imzosini tekshirish uchun mo‘ljallangan.
 
-## 2.1. Запуск и настройка
+## 2.1. Ishga tushirish va sozlash
 
-Для запуска требуется:
- - JRE v1.8. (Docker image: `amazoncorretto:8-alpine3.19-jre`)
- - Интернет соединение до сервера `vpn.e-imzo.uz:3443` (`testvpn.e-imzo.uz:2443` для тестирования) (сервера доступны только из Узбекистана).
- - Файлы конфигурации и VPN-ключи (могут быть в отдельном zip файле, извлеките их в директорию где находится e-imzo-server.jar).
+Ishga tushirish uchun talab qilinadi:
+ - JRE v1.8 (Docker image: `amazoncorretto:8-alpine3.19-jre`)
+ - `vpn.e-imzo.uz:3443` serveriga internet ulanishi (`testvpn.e-imzo.uz:2443` test uchun). 
+   (Ushbu serverlar faqat O‘zbekistondan kirish uchun mavjud).
+ - Sozlash fayllari va VPN kalitlari (ular alohida ZIP faylda bo‘lishi mumkin, ushbu fayllarni `e-imzo-server.jar` joylashgan katalogga chiqarish kerak).
 
-Запуск выполняется командой:
+Serverni ishga tushirish buyrug‘i:
 
     java -Dfile.encoding=UTF-8 -jar e-imzo-server.jar config.properties
 
-После запуска в консоле напечатается лог примерно следующего содержания:
+Ishga tushgandan so‘ng, konsolda taxminan quyidagi log ko‘rinadi:
+
 ```
 Sep 27, 2022 9:55:03 AM uz.yt.eimzo.server.Application main
 INFO: e-imzo-server version: 1.1.1
 ********************************************************************************
 
-УСЛОВИЯ ИСПОЛЬЗОВАНИЯ ПРОГРАММНОГО ОБЕСПЕЧЕНИЯ E-IMZO-SERVER 
-НАУЧНО-ИНФОРМАЦИОННОГО ЦЕНТРА НОВЫХ ТЕХНОЛОГИЙ (НИЦ)
+E-IMZO-SERVER DASTURIY TA’MINOTIDAN FOYDALANISH SHARTLARI
+YANGI TEXNOLOGIYALAR ILMIY-INFORMATSION MARKAZI (NIIM)
 
-Эти условия являются соглашением между НИЦ и Вами. Пожалуйста, прочтите их. 
-Они применяются к вышеуказанному программному обеспечению. 
+Ushbu shartlar NIIM va Siz o‘rtasidagi kelishuv hisoblanadi. Iltimos, ularni diqqat bilan o‘qing.
+Ular yuqorida ko‘rsatilgan dasturiy ta’minotga nisbatan qo‘llaniladi.
 
-Используя это программное обеспечение, Вы тем самым подтверждаете свое согласие 
-соблюдать данные условия. Если Вы не согласны, не используйте это программное 
-обеспечение. 
+Ushbu dasturiy ta’minotdan foydalanish orqali Siz ushbu shartlarga rioya qilishga rozilik bildirasiz.
+Agar rozi bo‘lmasangiz, ushbu dasturiy ta’minotdan foydalanmang.
 
-Программное обеспечение можно использовать только в пределах прав, 
-предоставляемых заключенным договором (для проверки электронной цифровой 
-подписи формата PKCS#7).
+Dasturiy ta’minotdan faqat tuzilgan shartnoma doirasida (PKCS#7 formatidagi elektron raqamli
+imzoni tekshirish uchun) foydalanish mumkin.
 
-Данное программное обеспечение содержит другие модули. Использование модулей, 
-без заключенного письменного договора является нарушением авторского права НИЦ.
+Ushbu dasturiy ta’minot tarkibida boshqa modullar mavjud. Ushbu modullardan yozma
+shartnoma tuzmasdan foydalanish NIIM mualliflik huquqini buzish hisoblanadi.
 
-НИЦ не несет ответственности за последствия использования  модулей 
-E-IMZO-SERVER без заключенного письменного договора.
+NIIM E-IMZO-SERVER modullaridan yozma shartnomasiz foydalanish natijasida yuzaga keladigan
+oqibatlar uchun javobgarlikni o‘z zimmasiga olmaydi.
 
 ********************************************************************************
 
@@ -237,30 +235,30 @@ Sep 27, 2022 9:55:04 AM uz.yt.eimzo.server.Application main
 INFO: Started http server on: /0.0.0.0:8080
 
 ```
-Содержание файла конфигурации `config.properties`:
+`config.properties` konfiguratsiya faylining tarkibi:
 ```
-# слушать со всех IP-адресов сетевых карт и слушать порт 
-listen.ip=0.0.0.0
-listen.port=8080
+# barcha tarmoq kartalarining IP-manzillaridan tinglash va portni tinglash  
+listen.ip=0.0.0.0  
+listen.port=8080  
 
-# Адрес VPN-сервера
-vpn.tls.enabled=yes
-vpn.connect.host=vpn.e-imzo.uz
-vpn.connect.port=3443
+# VPN-server manzili  
+vpn.tls.enabled=yes  
+vpn.connect.host=vpn.e-imzo.uz  
+vpn.connect.port=3443  
 
-# Файлы VPN-ключей
+# VPN kalit fayllari  
 vpn.key.file.path=keys/example.uz-2022-10-24.key
 vpn.key.password=19E581A1AF9382F0
 vpn.truststore.file.path=keys/vpn.jks
 tsp.jks.file.path=keys/truststore.jks
 ```
-*Тестовая конфигурация может отличаться от приведенной выше конфигурации*
+*Test konfiguratsiyasi yuqorida keltirilgan konfiguratsiyadan farq qilishi mumkin*  
 
-Для проверки VPN соединения выполните CURL команду:
+VPN ulanishini tekshirish uchun quyidagi CURL buyruğini bajaring:
 ```
 curl -v http://127.0.0.1:8080/ping
 ```
-Ответ
+Javob
 ```
 {
   "serverDateTime": "2022-10-06 16:47:29",
@@ -273,17 +271,17 @@ curl -v http://127.0.0.1:8080/ping
   }
 }
 ```
-HTTP 200 - означает успешное выполнение HTTP запроса
+HTTP 200 - HTTP so‘rovining muvaffaqiyatli bajarilganligini bildiradi.
 
-`serverDateTime` - Дата и время на сервере.
+`serverDateTime` - Serverdagi sana va vaqt.
 
-`yourIP` - IP-адрес вашего сервера.
+`yourIP` - Sizning serveringizning IP-manzili.
 
-`vpnKeyInfo` - Данные VPN-ключа.
+`vpnKeyInfo` - VPN kaliti haqida ma'lumot.
 
-### 2.1.1. Запуск на двух и более серверов
+### 2.1.1. Ikki yoki undan ortiq serverda ishga tushirish
 
-При запуске E-IMZO-SERVER на двух и более серверов, они должны будут подключаться к одному Redis-серверу. Для этого нужно прописать в файл конфигурации `config.properties`: 
+Agar E-IMZO-SERVER ikki yoki undan ortiq serverda ishga tushirilsa, ular bitta Redis-serverga ulanib ishlashi kerak. Buning uchun `config.properties` konfiguratsiya fayliga quyidagilarni yozish kerak:
 ```
 cache.type=redis
 # IP-адрес Redis-сервера
@@ -297,16 +295,16 @@ cache.redis.password=test
 # Номер БД Redis-сервера
 cache.redis.db=0
 ```
-Балансировку нагрузки можно осуществить с помощью `Nginx` (см. соответствующую документацию). 
+Yuklamani muvozanatlash (load balancing) `Nginx` yordamida amalga oshirilishi mumkin (tegishli hujjatlarni ko‘ring).
 
-## 2.2. Описание методов E-IMZO-SERVER
+## 2.2. E-IMZO-SERVER metodlarining tavsifi
 
-E-IMZO-SERVER предоставляет REST-API методы к которым может обращаться Backend приложение или HTML/JavaScript приложение на прямую.
+E-IMZO-SERVER REST-API metodlarini taqdim etadi, ular orqali Backend ilova yoki HTML/JavaScript ilova to‘g‘ridan-to‘g‘ri murojaat qilishi mumkin.
 
-Методы начинающиеся с `/backend` **должны быть доступны только Backend приложению**, а методы начинающиеся с `/frontend` могут быть доступны как Backend приложению так и HTML/JavaScript приложению.
+`/backend` bilan boshlanadigan metodlar **faqat Backend ilova uchun mavjud bo‘lishi kerak**, `/frontend` bilan boshlanadigan metodlar esa Backend ilovaga ham, HTML/JavaScript ilovaga ham mavjud bo‘lishi mumkin.
 
-Изоляцию методов можно осуществить с помощью `Nginx`.
-Пример конфигурации `Nginx`:
+Metodlarni ajratishni `Nginx` yordamida amalga oshirish mumkin.
+`Nginx` konfiguratsiyasiga misol:
 ```
 server {
 	listen 80;
@@ -334,19 +332,19 @@ server {
 
 }
 ```
-`YOUR-BACKEND-APP:8080` - IP-Адрес и порт сервера где работает ваше Backend приложение.
+`YOUR-BACKEND-APP:8080` - bu sizning Backend ilovangiz ishlayotgan serverning IP-manzili va porti.
 
-`E-IMZO-SERVER:8080` - IP-Адрес и порт сервера где работает E-IMZO-SERVER.
+`E-IMZO-SERVER:8080` - bu E-IMZO-SERVER ishlayotgan serverning IP-manzili va porti.
 
 ### 2.2.1. `/frontend/challenge`
 
-Метод нужен для генерации случайного значение `Challenge` которое пользоваетль должен будет подписать и создать PKCS#7 документ.
+Ushbu metod foydalanuvchi imzolashi va PKCS#7 hujjatini yaratishi kerak bo‘lgan tasodifiy `Challenge` qiymatini yaratish uchun kerak.
 
-Пример вызова CURL командой:
+CURL buyruqlari orqali chaqirish misoli:
 ```
 curl -v http://127.0.0.1:8080/frontend/challenge
 ```
-Ответ
+Javob
 ```
 {
   "challenge": "9b573e40-cefd-42cc-a534-f6e78b27c2ae",
@@ -355,38 +353,37 @@ curl -v http://127.0.0.1:8080/frontend/challenge
   "message": ""
 }
 ```
-HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+HTTP 503 - E-IMZO-SERVER log faylini tekshiring.
 
-HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+HTTP 400 - so‘rov parametrlarida xatolik borligini bildiradi. E-IMZO-SERVER log faylini tekshiring.
 
-HTTP 200 - означает успешное выполнение HTTP запроса
+HTTP 200 - HTTP so‘rov muvaffaqiyatli bajarilganligini bildiradi.
 
-`status` - код состояния (1 - Успешно, иначе ошибка)
+`status` - holat kodi (1 - Muvaffaqiyatli, aks holda xatolik).
 
-`message` - если `status` не равно 1, то сообщения об ошибки.
+`message` - agar `status` 1 ga teng bo‘lmasa, xatolik haqida xabar.
 
-`challenge` - случайного значение которое пользоваетль должен будет подписать и создать PKCS#7 документ с помощю E-IMZO.
+`challenge` - foydalanuvchi imzolashi va E-IMZO yordamida PKCS#7 hujjatini yaratishi kerak bo‘lgan tasodifiy qiymat.
 
-`ttl` - время жизни `challenge` в секундах.
+`ttl` - `challenge` ning sekundlarda amal qilish muddati.
 
-*ВАЖНО ! Ответ не должен кешироваться в прокси или web-сервере.*
+*MUHIM! Javob proksi yoki web-serverda keshlanmasligi kerak.*
 
-Смотрите пример [`index.php`](example.uz/php/demo/index.php) функция `getChallenge`.
+Misol uchun [`index.php`](example.uz/php/demo/index.php) faylidagi `getChallenge` funksiyasiga qarang.
 
 ### 2.2.2. `/backend/auth`
 
-Метод нужен для аутентификации пользователя по PKCS#7 документу которое содежит `Challenge`
+Ushbu metod foydalanuvchini PKCS#7 hujjati orqali autentifikatsiya qilish uchun kerak, bu hujjatda `Challenge` mavjud bo‘ladi.
 
-Пример вызова CURL командой:
-
+CURL buyruqlari orqali chaqirish misoli:
 ```
 curl -v -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -X POST -d 'MIAGCSqGSIb...ak5wAAAAAAAA=' http://127.0.0.1:8080/backend/auth
 ```
-В HTTP -заголовке  `X-Real-IP` - должен передаваться  IP-Адрес пользователя а в `Host` - должен передаваться доменное имя сайта куда пользователь выполяет Вход.
+HTTP sarlavhasida `X-Real-IP` - foydalanuvchining IP-manzili uzatilishi kerak, `Host` - foydalanuvchi kirayotgan veb-saytning domen nomi uzatilishi kerak.
 
-Тело запроса должно содержать Base64-закодированный PKCS#7 документ.
+So‘rov tanasi Base64 formatida kodlangan PKCS#7 hujjatini o‘z ichiga olishi kerak.
 
-Ответ:
+Javob:
 ```
 {
   "subjectCertificateInfo": {
@@ -402,36 +399,35 @@ curl -v -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -X POST -d 'MIAGCSqGSIb...
   "message": ""
 }
 ```
-HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+HTTP 503 - E-IMZO-SERVER loglarini tekshiring.
 
-HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+HTTP 400 - so‘rov parametrlarida xatolik borligini anglatadi. E-IMZO-SERVER loglarini tekshiring.
 
-HTTP 200 - означает успешное выполнение HTTP запроса
+HTTP 200 - HTTP so‘rovi muvaffaqiyatli bajarilganligini anglatadi.
 
-`status` - код состояния (1 - Успешно, иначе ошибка)
+`status` - holat kodi (1 - Muvaffaqiyatli, aks holda xatolik).
 
-| status | Описание |
+| status | Tavsif |
 |--|--|
-| 1 | Успешно |
-| -1 | Неудалось проверить статус сертификата. Посмотрите лог E-IMZO-SERVER. |
-| -5 | Время подписи недействительна. Проверьте дату и время компьютера пользователя. |
-| -10 | ЭЦП недействительна |
-| -11 | Сертификат недействителен |
-| -12 | Сертификат недействителен на дату подписи |
-| -20 | Не найден challenge или срок его истек. Повторите заного. |
+| 1 | Muvaffaqiyatli |
+| -1 | Sertifikat holatini tekshirib bo‘lmadi. E-IMZO-SERVER loglarini tekshiring. |
+| -5 | Imzo vaqti yaroqsiz. Foydalanuvchi kompyuterining sana va vaqtini tekshiring. |
+| -10 | E-IMZO yaroqsiz |
+| -11 | Sertifikat yaroqsiz |
+| -12 | Sertifikat imzolash sanasida yaroqsiz |
+| -20 | Challenge topilmadi yoki muddati o‘tib ketdi. Qayta urinib ko‘ring. |
 
-`message` - если `status` не равно 1, то сообщения об ошибки.
+`message` - agar `status` 1 ga teng bo‘lmasa, xatolik haqidagi xabar.
 
-`subjectCertificateInfo` - информация о серитификате пользователя.
+`subjectCertificateInfo` - foydalanuvchi sertifikati haqida ma’lumot.
 
-
-Смотрите пример [`auth.php`](example.uz/php/demo/auth.php).
+Misolni qarang: [`auth.php`](example.uz/php/demo/auth.php).
 
 ### 2.2.3. `/frontend/timestamp/pkcs7`
 
-Метод нужен для прикрепления токена штампа времени к PKCS#7 документу.
+Ushbu metod PKCS#7 hujjatiga vaqt tamg‘asi tokenini biriktirish uchun kerak.
 
-Пример вызова CURL командой:
+CURL buyrug‘i bilan so‘rov yuborish misoli:
 ```
 curl -v -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -X POST -d 'MIAGCSq...GekNAAAAAAAA' http://127.0.0.1:8080/frontend/timestamp/pkcs7
 ```
