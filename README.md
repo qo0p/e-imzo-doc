@@ -431,11 +431,11 @@ CURL buyrug‘i bilan so‘rov yuborish misoli:
 ```
 curl -v -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -X POST -d 'MIAGCSq...GekNAAAAAAAA' http://127.0.0.1:8080/frontend/timestamp/pkcs7
 ```
-В HTTP -заголовке  `X-Real-IP` - должен передаваться  IP-Адрес пользователя а в `Host` - должен передаваться доменное имя сайта где пользователь подписал документ и создал PKCS#7 документ.
+HTTP sarlavhasida `X-Real-IP` foydalanuvchining IP-manzili uzatilishi kerak, Host sarlavhasida esa foydalanuvchi hujjatni imzolagan va PKCS#7 hujjatini yaratgan veb-saytning domen nomi uzatilishi lozim.
 
-Тело запроса должно содержать Base64-закодированный PKCS#7 документ.
+So‘rov tanasi Base64 formatida kodlangan PKCS#7 hujjatini o‘z ichiga olishi kerak.
 
-Ответ:
+Javob:
 ```
 {
   "pkcs7b64": "MIAGCSqG...bAAAAAAAA",
@@ -454,35 +454,35 @@ curl -v -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -X POST -d 'MIAGCSq...GekN
   "message": ""
 }
 ```
-HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+HTTP 503 - E-IMZO-SERVER jurnalini tekshiring.
 
-HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+HTTP 400 - so‘rov parametrlarida xatolik borligini bildiradi. E-IMZO-SERVER jurnalini tekshiring.
 
-HTTP 200 - означает успешное выполнение HTTP запроса
+HTTP 200 - HTTP so‘rovi muvaffaqiyatli bajarilganligini anglatadi.
 
-`status` - код состояния (1 - Успешно, иначе ошибка)
+`status` - holat kodi (1 - muvaffaqiyatli, aks holda xatolik).
 
-`message` - если `status` не равно 1, то сообщения об ошибки.
+`message` - agar `status` 1 ga teng bo‘lmasa, xatolik haqida xabar.
 
-`timestampedSignerList` - информация о серитификате пользователя к подписи которому был прикреплен токен штампа времени. Если массив пуст, то скорее всего отправленный PKCS#7 документ уже содержит токен штампа времени.
+`timestampedSignerList` - foydalanuvchi sertifikati haqida ma’lumot, uning imzosiga vaqt muhri tokeni qo‘shilgan. Agar massiv bo‘sh bo‘lsa, ehtimol yuborilgan PKCS#7 hujjati allaqachon vaqt muhri tokenini o‘z ichiga olgan.
 
-`pkcs7b64` - PKCS#7 документ с прикрепленным токеном штампа времени.
+`pkcs7b64` - vaqt muhri tokeni qo‘shilgan PKCS#7 hujjati.
 
-Смотрите пример [`cabinet.php`](example.uz/php/demo/cabinet.php) функция `attachTimestamp`.
+Namunani [`cabinet.php`](example.uz/php/demo/cabinet.php) faylidan `attachTimestamp` funksiyasida ko‘ring.
 
 ### 2.2.4. `/backend/pkcs7/verify/attached`
 
-Метод для проверки подписи PKCS#7Attached документа с прикрепленным токеном штампа времени.
+Bu metod PKCS#7Attached hujjatining imzosini tekshirish uchun ishlatiladi.
 
-Пример вызова CURL командой:
+CURL buyruq misoli:
 ```
 curl -v -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -X POST -d 'MIAGCSq...GekNAAAAAAAA' http://127.0.0.1:8080/backend/pkcs7/verify/attached
 ```
-В HTTP -заголовке  `X-Real-IP` - должен передаваться  IP-Адрес пользователя а в `Host` - должен передаваться доменное имя сайта где пользователь подписал документ и создал PKCS#7 документ.
+HTTP sarlavhasida `X-Real-IP` foydalanuvchining IP-manzili uzatilishi kerak, `Host` esa foydalanuvchi hujjatni imzolagan va PKCS#7 hujjatini yaratgan veb-saytning domen nomini o‘z ichiga olishi kerak.
 
-Тело запроса должно содержать Base64-закодированный PKCS#7 документ.
+So‘rov tanasi Base64 formatida kodlangan PKCS#7 hujjatini o‘z ichiga olishi kerak.
 
-Ответ:
+Javob:
 ```
 {
   "pkcs7Info": {
@@ -671,79 +671,87 @@ curl -v -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -X POST -d 'MIAGCSq...GekN
   "message": ""
 }
 ```
-HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+HTTP 503 - E-IMZO-SERVER jurnalini tekshiring.
 
-HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+HTTP 400 - So‘rov parametrlarida xatolik borligini anglatadi. E-IMZO-SERVER jurnalini tekshiring.
 
-HTTP 200 - означает успешное выполнение HTTP запроса
+HTTP 200 - HTTP so‘rovi muvaffaqiyatli bajarilganligini bildiradi.
 
-`status` - код состояния (1 - Успешно, иначе ошибка)
+`status` - holat kodi (1 - Muvaffaqiyatli, aks holda xatolik)
 
-| status | Описание |
+| status | Tavsif |
 |--|--|
-| 1 | Успешно |
-| -1 | Неудалось проверить статус сертификата. Посмотрите лог E-IMZO-SERVER. |
-| -10 | ЭЦП недействительна |
-| -11 | Сертификат недействителен |
-| -12 | Сертификат недействителен на дату подписи |
-| -20 | Неудалось проверить статус сертификата Timestamp. Посмотрите лог E-IMZO-SERVER. |
-| -21 | ЭЦП или хеш Timestamp недействительна |
-| -22 | Сертификат Timestamp недействителен |
-| -23 | Сертификат Timestamp недействителен на дату подписи |
+| 1 | Muvaffaqiyatli |
+| -1 | Sertifikat holatini tekshirib bo‘lmadi. E-IMZO-SERVER jurnalini tekshiring. |
+| -10 | Elektron raqamli imzo (ERI) yaroqsiz |
+| -11 | Sertifikat yaroqsiz |
+| -12 | Sertifikat imzo sanasida yaroqsiz |
+| -20 | Timestamp sertifikati holatini tekshirib bo‘lmadi. E-IMZO-SERVER jurnalini tekshiring. |
+| -21 | ERI yoki Timestamp hash yaroqsiz |
+| -22 | Timestamp sertifikati yaroqsiz |
+| -23 | Timestamp sertifikati imzo sanasida yaroqsiz |
 
-`message` - если `status` не равно 1, то сообщения об ошибки.
+`message` - Agar `status` 1 ga teng bo‘lmasa, xatolik haqida xabar.
 
-`pkcs7Info` - информация о проверки подписи PKCS#7 документа.
+`pkcs7Info` - PKCS#7 imzo hujjatini tekshirish natijalari.
 
-| Поле | Описание |
+| Maydon | Tavsif |
 |--|--|
-| pkcs7Info.documentBase64 | подписанный документ в кодировке (Base64) |
-| pkcs7Info.signers[N] | информация о том кто подписал документ |
-| pkcs7Info.signers[N].certificate[0] | информация о сертификате пользователя |
-| pkcs7Info.signers[N].certificate[1] | информация о сертификате ЦРК |
-| pkcs7Info.signers[N].certificate[2] | информация о корневом сертификате (если имеется) |
-| pkcs7Info.signers[N].OCSPResponse | OCSP ответ от сервера ЦРК |
-| pkcs7Info.signers[N].signingTime | дата на компьютере пользователя при подписании (при получении сервером подписанного документа следует сверить это поле с реальным временем если PKCS#7 документ не содержит токен штампа времени). токен штампа времени - содержит ЭЦП документа и точную дату и время подписи, выдается сервером Доверительной третьей стороны в виде подписанного электронной цифровой подписью документа, которая подтверждает что ЭЦП документа была создана в определенный момент времени. |
-| pkcs7Info.signers[N].verified | ЭЦП действительна (если true - да, если false нет) |
-| pkcs7Info.signers[N].certificateVerified | цепочка сертификатов действительна (если true - да, если false нет) |
-| pkcs7Info.signers[N].revokedStatusInfo | Если сертификат пользователя был приостановлен или отозван, то поле содержит дату и причину. |
-| pkcs7Info.signers[N].certificateValidAtSigningTime | сертификат действителен на дату подписи (если true - да, если false нет). За дату подписи берется поле pkcs7Info.signers[N].signingTime или дата и время токена штампа времени (если присутствует) |
-| pkcs7Info.signers[N].exception | ошибка при проверке подписи (причина ошибки при проверке подписи или статуса сертификата) |
-| UID | Физ.ИНН. |
-| 1.2.860.3.16.1.2 | ПИНФЛ |
-| 1.2.860.3.16.1.1 | Юр.ИНН (поле отсутствует если субъект является физ. лицом) |
+| pkcs7Info.documentBase64 | Imzolangan hujjat (Base64 kodlangan) |
+| pkcs7Info.signers[N] | Hujjatni imzolagan shaxs haqida ma’lumot |
+| pkcs7Info.signers[N].certificate[0] | Foydalanuvchi sertifikati haqida ma’lumot |
+| pkcs7Info.signers[N].certificate[1] | CRK sertifikati haqida ma’lumot |
+| pkcs7Info.signers[N].certificate[2] | Ildiz sertifikati haqida ma’lumot (agar mavjud bo‘lsa) |
+| pkcs7Info.signers[N].OCSPResponse | CRK serveridan OCSP javobi |
+| pkcs7Info.signers[N].signingTime | Foydalanuvchi imzo qo‘ygan vaqt (Server tomonidan imzolangan hujjat qabul qilinganda, ushbu maydon haqiqiy vaqt bilan solishtirilishi kerak, agar PKCS#7 hujjati timestamp tokenni o‘z ichiga olmasa). Timestamp token - ERI va aniq sanani o‘z ichiga olgan hujjat bo‘lib, Ishonchli uchinchi tomon serveri tomonidan beriladi va elektron imzo aynan shu vaqtda yaratilganligini tasdiqlaydi. |
+| pkcs7Info.signers[N].verified | ERI yaroqliligi (`true` - ha, `false` - yo‘q) |
+| pkcs7Info.signers[N].certificateVerified | Sertifikatlar zanjiri yaroqli (`true` - ha, `false` - yo‘q) |
+| pkcs7Info.signers[N].revokedStatusInfo | Agar foydalanuvchi sertifikati to‘xtatilgan yoki bekor qilingan bo‘lsa, maydon sabab va sanani o‘z ichiga oladi. |
+| pkcs7Info.signers[N].certificateValidAtSigningTime | Sertifikat imzo vaqtida yaroqli (`true` - ha, `false` - yo‘q). Imzo sanasi sifatida `pkcs7Info.signers[N].signingTime` yoki timestamp tokenning sanasi qabul qilinadi (agar mavjud bo‘lsa). |
+| pkcs7Info.signers[N].exception | Imzoni tekshirishda xatolik (imzoni yoki sertifikat holatini tekshirishda yuzaga kelgan xato sababi) |
+| UID | Jismoniy shaxsning INN raqami |
+| 1.2.860.3.16.1.2 | PINFL |
+| 1.2.860.3.16.1.1 | Yuridik shaxsning INN raqami (jismoniy shaxs bo‘lsa, maydon mavjud emas) |
 
-Смотрите пример [`verify.php`](example.uz/php/demo/verify.php).
+Misolni ko‘ring: [`verify.php`](example.uz/php/demo/verify.php).
 
 ### 2.2.5. `/backend/pkcs7/verify/detached`
 
-Метод для проверки подписи PKCS#7Detached документа с прикрепленным токеном штампа времени.
+PKCS#7Detached hujjatining imzosini vaqt muhri tokeni bilan tekshirish usuli.
 
-Пример вызова CURL командой:
+CURL buyrug‘i yordamida chaqirish namunasi:
 ```
 curl -v -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -X POST -d 'c29tZ...VudA==|MIAGCSq...GekNAAAAAAAA' http://127.0.0.1:8080/backend/pkcs7/verify/attached
 ```
-В HTTP -заголовке  `X-Real-IP` - должен передаваться  IP-Адрес пользователя а в `Host` - должен передаваться доменное имя сайта где пользователь подписал документ и создал PKCS#7 документ.
+HTTP sarlavhasida `X-Real-IP` – foydalanuvchining IP-manzili, `Host` – foydalanuvchi hujjatni imzolagan va PKCS#7 hujjatini yaratgan sayt domen nomi ko‘rsatilishi kerak.
 
-Тело запроса должно содержать Base64-закодированный исходный документ и Base64-закодированный PKCS#7 документ разделенный символом `|`.
+So‘rov tanasi quyidagilarni o‘z ichiga olishi kerak:
+- Base64 formatida kodlangan dastlabki hujjat
+- Base64 formatida kodlangan PKCS#7 hujjati
+- Ikkalasi `|` belgisi bilan ajratiladi
 
-Ответ такой же как в методе `/backend/pkcs7/verify/attached` но json не содержит поле `pkcs7Info.documentBase64`.
+Javob `/backend/pkcs7/verify/attached` usuli bilan bir xil, ammo JSON ichida `pkcs7Info.documentBase64` maydoni bo‘lmaydi.
 
-Смотрите пример [`verify.php`](example.uz/php/demo/verify.php).
+Namunaviy kodni quyidagi havolada ko‘rish mumkin: [`verify.php`](example.uz/php/demo/verify.php).
+
+---
 
 ### 2.2.6. `/frontend/pkcs7/make-attached`
 
-Метод для формирования PKCS#7/Attached документа из исходного и PKCS#7Detached документов
+Dastlabki hujjat va PKCS#7Detached hujjatdan PKCS#7/Attached hujjatini yaratish usuli.
 
-Пример вызова CURL командой:
+CURL buyrug‘i yordamida chaqirish namunasi:
 ```
 curl -v -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -X POST -d 'c29tZSB...udA==|MIAGCSq...GekNAAAAAAAA' http://127.0.0.1:8080/frontend/pkcs7/make-attached
 ```
-В HTTP -заголовке  `X-Real-IP` - должен передаваться  IP-Адрес пользователя а в `Host` - должен передаваться доменное имя сайта где пользователь подписал документ и создал PKCS#7 документ.
+HTTP sarlavhasida `X-Real-IP` – foydalanuvchining IP-manzili, `Host` – foydalanuvchi hujjatni imzolagan va PKCS#7 hujjatini yaratgan sayt domen nomi ko‘rsatilishi kerak.
 
-Тело запроса должно содержать Base64-закодированный исходный документ и Base64-закодированный PKCS#7 документ разделенный символом `|`.
+So‘rov tanasi quyidagilarni o‘z ichiga olishi kerak:
+- Base64 formatida kodlangan dastlabki hujjat
+- Base64 formatida kodlangan PKCS#7 hujjati
+- Ikkalasi `|` belgisi bilan ajratiladi
 
-Ответ:
+Javob:
 ```
 {
   "pkcs7b64": "MIAGCSqG...wAAAAAAAA==",
@@ -751,31 +759,31 @@ curl -v -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -X POST -d 'c29tZSB...udA=
   "message": ""
 }
 ```
-HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+- **HTTP 503** – E-IMZO-SERVER loglarini tekshiring.  
+- **HTTP 400** – So‘rov parametrlari noto‘g‘ri. E-IMZO-SERVER loglarini tekshiring.  
+- **HTTP 200** – So‘rov muvaffaqiyatli bajarildi.  
 
-HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+`status` – holat kodi (1 - Muvaffaqiyatli, aks holda xatolik)  
 
-HTTP 200 - означает успешное выполнение HTTP запроса
+`message` – agar `status` 1 ga teng bo‘lmasa, xatolik haqida xabar.  
 
-`status` - код состояния (1 - Успешно, иначе ошибка)
+`pkcs7b64` – PKCS#7/Attached hujjati.  
 
-`message` - если `status` не равно 1, то сообщения об ошибки.
+### 2.2.7. `/frontend/pkcs7/join`  
 
-`pkcs7b64` - PKCS#7/Attached документ.
+Ikki PKCS#7/Attached hujjatini birlashtirib, bitta PKCS#7/Attached hujjat hosil qilish usuli. Bunda har ikkala PKCS#7/Attached hujjati bir xil dastlabki hujjatni o‘z ichiga olishi kerak.  
 
-### 2.2.7. `/frontend/pkcs7/join`
-
-Метод для склеивания двух PKCS#7/Attached документов и формирования одного PKCS#7/Attached документа, при условии что оба PKCS#7/Attached содержат один и тот же исходный документ. 
-
-Пример вызова CURL командой:
+**CURL buyrug‘i yordamida chaqirish namunasi:**  
 ```
 curl -v -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -X POST -d 'MIAGCSq...GekNAAAAAAAA|MIAGCSq...GekNAAAAAAAA' http://127.0.0.1:8080/frontend/pkcs7/join
 ```
-В HTTP -заголовке  `X-Real-IP` - должен передаваться  IP-Адрес пользователя а в `Host` - должен передаваться доменное имя сайта где пользователь подписал документ и создал PKCS#7 документ.
+**HTTP sarlavhalari:**  
+- `X-Real-IP` – foydalanuvchining IP-manzili.  
+- `Host` – foydalanuvchi hujjatni imzolagan va PKCS#7 hujjatini yaratgan sayt domen nomi.  
 
-Тело запроса должно содержать два Base64-закодированных PKCS#7 документов разделенных символом `|`.
+So‘rov tanasi ikkita Base64 kodlangan PKCS#7 hujjatini o‘z ichiga olishi va `|` belgisi bilan ajratilgan bo‘lishi kerak.  
 
-Ответ:
+**Javob:**  
 ```
 {
   "pkcs7b64": "MIAGCSqG...wAAAAAAAA==",
@@ -783,249 +791,252 @@ curl -v -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -X POST -d 'MIAGCSq...GekN
   "message": ""
 }
 ```
-HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+- **HTTP 503** – E-IMZO-SERVER loglarini tekshiring.  
+- **HTTP 400** – So‘rov parametrlari noto‘g‘ri. E-IMZO-SERVER loglarini tekshiring.  
+- **HTTP 200** – So‘rov muvaffaqiyatli bajarildi.  
 
-HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+`status` – holat kodi (1 - Muvaffaqiyatli, aks holda xatolik).  
 
-HTTP 200 - означает успешное выполнение HTTP запроса
+`message` – agar `status` 1 ga teng bo‘lmasa, xatolik haqida xabar.  
 
-`status` - код состояния (1 - Успешно, иначе ошибка)
+`pkcs7b64` – bitta PKCS#7/Attached hujjat sifatida birlashtirilgan hujjat.  
 
-`message` - если `status` не равно 1, то сообщения об ошибки.
+## 2.3. Dasturchi uchun bosqichma-bosqich qo‘llanma  
 
-`pkcs7b64` - склеенный в один PKCS#7/Attached документ.
-
-## 2.3. Пошаговая инструкция для разработчика
-
-Для развёртывания demo сайта на компьютере разработчика в ОС Windows смотрите [`README.md`](example.uz/php/README.md).
+Windows operatsion tizimida dasturchi kompyuterida demo saytni ishga tushirish uchun [`README.md`](example.uz/php/README.md) faylini ko‘ring.
 
 # 3. ID-CARD E-IMZO MOBILE REST-API
 
-## ТЕРМИНЫ И ОПРЕДЕЛЕНИЯ
+## TERMINLAR VA TA’RIFLAR  
 
-  - ИС - информационная система.
-  - NFC - «ближняя бесконтактная связь». Технология беспроводной передачи данных малого радиуса действия, которая дает возможность обмена данными между устройствами, находящимися на расстоянии около 10 сантиметров.
-  - Смартфон - мобильный телефон (современный — как правило, с сенсорным
-экраном), дополненный функциональностью карманного персонального
-компьютера.
-  - ID-карта - пластиковая карта со встроенной микросхемой, содержит микропроцессор и операционную систему, обладают возможностью проводить криптографические вычисления по стандарту O'zDSt 1092:2009 - «Процессы формирования и проверки электронной цифровой подписи» посредством установленного Java-апплета E-IMZO.
-  - HTTP - «протокол передачи гипертекста» - протокол прикладного уровня передачи данных, изначально - в виде гипертекстовых документов в формате HTML, в настоящее время используется для передачи произвольных данных.
-  - PKCS#7 - В криптографии - «синтаксис криптографических сообщений» - это стандартный синтаксис для хранения подписанных и / или зашифрованных данных.
-  - PKCS#7 Attached - PKCS#7 документ который содержит исходный документ, ее ЭЦП, цепочку сертификатов субъекта подписавшего исходный документ.
-  - PKCS#7 Detached - PKCS#7 документ который не содержит исходный документ а только ее ЭЦП, цепочку сертификатов субъекта подписавшего исходный документ. В процессе проверки ЭЦП PKCS#7 документа, должен быть предоставлен исходный документ как отдельный файл.
-  - URL - Унифицированный указатель ресурса, система унифицированных адресов электронных ресурсов, или единообразный определитель местонахождения ресурса.
-  - Клиент - ИС которая подключена к ИС “ID-CARD E-IMZO MOBILE” и использует ее ресурсы.
-  - UPLOAD URL - HTTP-адрес Клиента, куда ИС “ID-CARD E-IMZO MOBILE” отправит PKCS#7 Detached документ.
-  - SiteID - идентификатор UPLOAD URL Клиента.
-  - DocumentID - идентификатор документа (для подписи) в ИС Клиента.
-  - SerialNumber - серийный номер сертификата пользователя.
-  - Challenge - текст который состоит из случайных символов и штампа времени.
-  - REST - (от англ. Representational State Transfer - «передача состояния представления») - архитектурный стиль взаимодействия компонентов распределенного приложения в сети.
-  - API - (программный интерфейс приложения, интерфейс прикладного программирования) (англ. application programming interface, API — описание способов (набор классов, процедур, функций, структур или констант), которыми одна компьютерная программа может взаимодействовать с другой программой.
-  - Nginx - веб-сервер и почтовый прокси-сервер, работающий на Unix-подобных операционных системах.
-  - Redis - резидентная система управления базами данных класса NoSQL с открытым исходным кодом, работающая со структурами данных типа «ключ - значение».
-  - PHP - скриптовый язык общего назначения, интенсивно применяемый для разработки веб-приложений.
+- **IS** – axborot tizimi.  
+- **NFC** – “yaqin masofadagi aloqa”. Kichik radiusli simsiz ma’lumot almashish texnologiyasi bo‘lib, taxminan 10 santimetr masofada joylashgan qurilmalar o‘rtasida ma’lumot almashish imkoniyatini beradi.  
+- **Smartfon** – zamonaviy sensor ekranga ega bo‘lgan mobil telefon bo‘lib, cho‘ntak shaxsiy kompyuteri funksiyalariga ega.  
+- **ID-karta** – plastik karta bo‘lib, ichiga o‘rnatilgan mikrochipga ega, mikroprotsessor va operatsion tizimni o‘z ichiga oladi hamda O'zDSt 1092:2009 standarti bo‘yicha elektron raqamli imzoni shakllantirish va tekshirish imkoniyatiga ega Java-applet E-IMZO o‘rnatilgan.  
+- **HTTP** – “gipermatnni uzatish protokoli” – dastur darajasidagi ma’lumot uzatish protokoli bo‘lib, dastlab HTML formatidagi gipermatnli hujjatlarni uzatish uchun ishlatilgan, hozirda esa har qanday turdagi ma’lumotlarni uzatish uchun qo‘llaniladi.  
+- **PKCS#7** – kriptografiyada “kriptografik xabar sintaksisi” bo‘lib, imzolangan va/yoki shifrlangan ma’lumotlarni saqlash uchun standart sintaksis hisoblanadi.  
+- **PKCS#7 Attached** – dastlabki hujjat, uning EDSi (elektron raqamli imzosi) va imzo qo‘ygan subyekt sertifikatlar zanjirini o‘z ichiga olgan PKCS#7 hujjati.  
+- **PKCS#7 Detached** – dastlabki hujjatni o‘z ichiga olmaydigan, faqatgina uning EDSi va imzo qo‘ygan subyekt sertifikatlar zanjirini o‘z ichiga olgan PKCS#7 hujjati. PKCS#7 hujjatining EDSini tekshirish jarayonida dastlabki hujjat alohida fayl sifatida taqdim etilishi kerak.  
+- **URL** – yagona resurs manzili, elektron resurslarning unifikatsiyalangan manzillari tizimi yoki resursning yagona identifikatori.  
+- **Klient** – “ID-CARD E-IMZO MOBILE” axborot tizimiga ulangan va uning resurslaridan foydalanadigan axborot tizimi.  
+- **UPLOAD URL** – “ID-CARD E-IMZO MOBILE” tizimi PKCS#7 Detached hujjatini yuboradigan Klientning HTTP-manzili.  
+- **SiteID** – Klientning UPLOAD URL identifikatori.  
+- **DocumentID** – Klientning axborot tizimidagi (imzolash uchun) hujjat identifikatori.  
+- **SerialNumber** – foydalanuvchi sertifikatining seriya raqami.  
+- **Challenge** – tasodifiy belgilar va vaqt tamg‘asidan tashkil topgan matn.  
+- **REST** – (Representational State Transfer – “holatni taqdim qilish orqali uzatish”) – tarmoqqa ulangan taqsimlangan ilovalar komponentlari o‘rtasidagi o‘zaro aloqani tashkil etish uslubi.  
+- **API** – (Application Programming Interface) – dasturiy interfeys bo‘lib, bir dasturiy ta’minot boshqa dasturiy ta’minot bilan o‘zaro aloqada bo‘lishi uchun zarur bo‘lgan usullar, funksiyalar va tuzilmalar to‘plami.  
+- **Nginx** – Unix-ga o‘xshash operatsion tizimlarda ishlaydigan veb-server va pochta proksi-server.  
+- **Redis** – ochiq kodli NoSQL ma’lumotlar bazasi boshqaruv tizimi bo‘lib, “kalit-qiymat” tipidagi ma’lumot tuzilmalari bilan ishlaydi.  
+- **PHP** – umumiy maqsadli skript tili bo‘lib, veb-ilovalarni ishlab chiqishda keng qo‘llaniladi.  
 
-E-IMZO ID-CARD REST-API предоставляет REST-API методы к которым может обращаться Backend приложение или Мобильное приложение.
+**E-IMZO ID-CARD REST-API** – backend yoki mobil ilova murojaat qilishi mumkin bo‘lgan REST-API usullarini taqdim etadi.
 
-## ОПИСАНИЕ ИС “ID-CARD E-IMZO MOBILE”
+## “ID-CARD E-IMZO MOBILE” AXBOROT TIZIMI TAVSIFI  
 
-ИС “ID-CARD E-IMZO MOBILE” дает возможность ИС Клиента идентифицировать владельца ID-карты и предоставляет возможность подписания электронного документа электронной цифровой подписью закрытым ключом хранящимся в ID-карте владельца (пользователя).
+“ID-CARD E-IMZO MOBILE” axborot tizimi Klient tizimiga ID-karta egasini identifikatsiya qilish imkoniyatini beradi va ID-kartada saqlanadigan yopiq kalit yordamida elektron hujjatni elektron raqamli imzo bilan imzolash imkoniyatini taqdim etadi.  
 
-## 3.1. Технические требования
+## 3.1. Texnik talablar  
 
-### 3.1.1. Технические требования к ИС Клиента
+### 3.1.1. Klient axborot tizimi uchun texnik talablar  
 
-  - В ИС Клиента должен быть установлен Nginx.
-  - В ИС Клиента должен быть установлен Redis.
-  - ИС Клиента должна быть доступна через интернет по протоколу HTTP/HTTPS.
-  - ИС Клиента должна иметь постоянный UPLOAD URL.
-  - ИС Клиента должна быть зарегистрирована в ИС “ID-CARD E-IMZO MOBILE” и получить SiteID.
+- Klient tizimida **Nginx** o‘rnatilgan bo‘lishi kerak.  
+- Klient tizimida **Redis** o‘rnatilgan bo‘lishi kerak.  
+- Klient tizimi **HTTP/HTTPS** protokoli orqali internet orqali mavjud bo‘lishi kerak.  
+- Klient tizimi doimiy **UPLOAD URL** ga ega bo‘lishi kerak.  
+- Klient tizimi **“ID-CARD E-IMZO MOBILE”** tizimida ro‘yxatdan o‘tib, **SiteID** olishi kerak.  
 
-### 3.1.2. Технические требования к пользователю
+### 3.1.2. Foydalanuvchi uchun texnik talablar  
 
-  - Пользователь должен обладать ID-картой.
-  - Пользователь должен обладать смартфоном оборудованным считывателем NFC.
-  - Сертификат ЭЦП пользователя должен быть действительным.
-  - На смартфоне пользователя должно быть установлено мобильное приложение E-IMZO ID-CARD (https://play.google.com/store/apps/details?id=uz.yt.idcard.eimzo).
+- Foydalanuvchida **ID-karta** bo‘lishi kerak.  
+- Foydalanuvchi **NFC o‘quvchi** bilan jihozlangan smartfonga ega bo‘lishi kerak.  
+- Foydalanuvchining **elektron raqamli imzo (EDS) sertifikati** amal qilishi kerak.  
+- Foydalanuvchining smartfonida **E-IMZO ID-CARD** mobil ilovasi o‘rnatilgan bo‘lishi kerak ([Google Play](https://play.google.com/store/apps/details?id=uz.yt.idcard.eimzo)).  
 
-## 3.2. Принцип работы
+## 3.2. Ishlash prinsipi  
 
-Демо сайт и пример https://test.e-imzo.uz/demo/eimzoidcard/
+Demosayt va namunaviy kod: [test.e-imzo.uz](https://test.e-imzo.uz/demo/eimzoidcard/)  
 
-### 3.2.1. Идентификация Пользователя
+### 3.2.1. Foydalanuvchini identifikatsiya qilish  
 
-Последовательность операций для выполнения идентификации по ЭЦП в мобильное приложение:
+Elektron raqamli imzo (EDS) orqali mobil ilovada foydalanuvchini identifikatsiya qilish jarayoni quyidagi ketma-ketlikda amalga oshiriladi:  
 
 ```mermaid
 sequenceDiagram
-  actor user as Пользователь
-  participant idcard as ID-карта
-  participant eimzo as Моб.прил. E-IMZO ID-CARD
-  participant frontend as Ваше Моб.прил.
-  participant backend as Ваш PHP Backend
+  actor user as Foydalanuvchi
+  participant idcard as ID-karta
+  participant eimzo as Mobil ilova E-IMZO ID-CARD
+  participant frontend as Sizning Mobil ilovangiz
+  participant backend as Sizning PHP Backend
   participant rest as REST-API e-imzo-server
-  participant api as ИС ID-CARD E-IMZO MOBILE
-  
-  user ->> frontend: нажимает кнопку “Вход”
+  participant api as IS ID-CARD E-IMZO MOBILE
+
+  user ->> frontend: "Kirish" tugmasini bosadi
   frontend ->> rest: POST /frontend/mobile/auth
   rest ->> frontend: {SiteID, DocumentID, Challenge}
-  Note over frontend: формирует хеш от Challenge
-  loop опрос состояния
+  Note over frontend: Challenge'dan xesh hosil qiladi
+  loop holatni tekshirish
     frontend ->> rest: POST /frontend/mobile/status
     rest ->> frontend: {status: 2}
   end
-  Note over frontend: формирует и открывает Deeplink
-  Note over frontend: происходит вызов Моб.прил. E-IMZO ID-CARD
-  frontend -->> eimzo: Deeplink (SiteID, DocumentID, хеш, CRC32)
-  Note over eimzo: декодирует Deeplink и извлекает SiteID, DocumentID, хеш
-  eimzo -->> user: запрос PIN-кода
-  user -->> eimzo: PIN-код
-  eimzo -->> idcard: PIN-код, хеш
-  Note over idcard : проверяет PIN-код и формирует ЭЦП
-  idcard -->> eimzo: ЭЦП, SerialNumber
-  eimzo ->> api: ЭЦП, SerialNumber, SiteID, DocumentID, хеш
-  Note over api: формирует документ PKCS7 Detached
-  Note over api: определяет UPLOAD URL по SiteID
+  Note over frontend: Deeplink yaratadi va ochadi
+  Note over frontend: E-IMZO ID-CARD mobil ilovasi ishga tushadi
+  frontend -->> eimzo: Deeplink (SiteID, DocumentID, xesh, CRC32)
+  Note over eimzo: Deeplink'ni dekodlaydi va SiteID, DocumentID, xeshni ajratib oladi
+  eimzo -->> user: PIN-kod so‘rovi
+  user -->> eimzo: PIN-kod kiritadi
+  eimzo -->> idcard: PIN-kod, xesh
+  Note over idcard: PIN-kodni tekshiradi va EDS hosil qiladi
+  idcard -->> eimzo: EDS, SerialNumber
+  eimzo ->> api: EDS, SerialNumber, SiteID, DocumentID, xesh
+  Note over api: PKCS7 Detached hujjatini yaratadi
+  Note over api: SiteID orqali UPLOAD URL’ni aniqlaydi
   api ->> rest: POST /frontend/mobile/upload PKCS7, DocumentID, SerialNumber
-  loop опрос состояния
+  loop holatni tekshirish
     frontend ->> rest: POST /frontend/mobile/status
     rest ->> frontend: {status: 1}
   end
-  frontend ->> backend: запрос результата проверки
+  frontend ->> backend: Tekshirish natijasini so‘rash
   backend ->> rest: POST /backend/mobile/authenticate/{DocumentID}
   rest ->> backend: {status: 1, subjectCertificateInfo}
-  backend ->> frontend: Данные пользователя
-  frontend -->> user: идентификация успешна
+  backend ->> frontend: Foydalanuvchi ma’lumotlari
+  frontend -->> user: Identifikatsiya muvaffaqiyatli
 
 ```
-### 3.2.2. Подписание документа Пользователя
+### 3.2.2. Foydalanuvchi hujjatini imzolash  
 
-Последовательность операций для подписания электронного документа пользователя в мобильном приложении:
+Foydalanuvchi elektron hujjatini mobil ilovada imzolash jarayonining ketma-ketligi:
 
 ```mermaid
 sequenceDiagram
-  actor user as Пользователь
-  participant idcard as ID-карта
-  participant eimzo as Моб.прил. E-IMZO ID-CARD
-  participant frontend as Ваше Моб.прил.
-  participant backend as Ваш PHP Backend
+  actor user as Foydalanuvchi
+  participant idcard as ID-karta
+  participant eimzo as Mobil ilova E-IMZO ID-CARD
+  participant frontend as Sizning Mobil ilovangiz
+  participant backend as Sizning PHP Backend
   participant rest as REST-API e-imzo-server
-  participant api as ИС ID-CARD E-IMZO MOBILE
-  
-  user ->> frontend: создает Document и нажимает кнопку “Подписать”
+  participant api as IS ID-CARD E-IMZO MOBILE
+
+  user ->> frontend: Hujjat yaratadi va "Imzolash" tugmasini bosadi
   frontend ->> rest: POST /frontend/mobile/sign
   rest ->> frontend: {SiteID, DocumentID}
-  Note over frontend: формирует хеш от Document
-  loop опрос состояния
+  Note over frontend: Hujjatdan xesh hosil qiladi
+  loop holatni tekshirish
     frontend ->> rest: POST /frontend/mobile/status
     rest ->> frontend: {status: 2}
   end
-  Note over frontend: формирует и открывает Deeplink
-  Note over frontend: происходит вызов Моб.прил. E-IMZO ID-CARD
-  frontend -->> eimzo: Deeplink (SiteID, DocumentID, хеш, CRC32)
-  Note over eimzo: декодирует Deeplink и извлекает SiteID, DocumentID, хеш
-  eimzo -->> user: запрос PIN-кода
-  user -->> eimzo: PIN-код
-  eimzo -->> idcard: PIN-код, хеш
-  Note over idcard : проверяет PIN-код и формирует ЭЦП
-  idcard -->> eimzo: ЭЦП, SerialNumber
-  eimzo ->> api: ЭЦП, SerialNumber, SiteID, DocumentID, хеш
-  Note over api: формирует документ PKCS7 Detached
-  Note over api: определяет UPLOAD URL по SiteID
+  Note over frontend: Deeplink yaratadi va ochadi
+  Note over frontend: E-IMZO ID-CARD mobil ilovasi ishga tushadi
+  frontend -->> eimzo: Deeplink (SiteID, DocumentID, xesh, CRC32)
+  Note over eimzo: Deeplink'ni dekodlaydi va SiteID, DocumentID, xeshni ajratib oladi
+  eimzo -->> user: PIN-kod so‘rovi
+  user -->> eimzo: PIN-kod kiritadi
+  eimzo -->> idcard: PIN-kod, xesh
+  Note over idcard: PIN-kodni tekshiradi va EDS hosil qiladi
+  idcard -->> eimzo: EDS, SerialNumber
+  eimzo ->> api: EDS, SerialNumber, SiteID, DocumentID, xesh
+  Note over api: PKCS7 Detached hujjatini yaratadi
+  Note over api: SiteID orqali UPLOAD URL’ni aniqlaydi
   api ->> rest: POST /frontend/mobile/upload PKCS7, DocumentID, SerialNumber
-  loop опрос состояния
+  loop holatni tekshirish
     frontend ->> rest: POST /frontend/mobile/status
     rest ->> frontend: {status: 1}
   end
   frontend ->> backend: POST /upload/Document
   backend ->> rest: POST /backend/mobile/verify
   rest ->> backend: {status: 1, subjectCertificateInfo, verificationInfo}
-  backend ->> frontend: Данные пользователя и результата проверки ЭЦП
-  frontend -->> user: документ принят/не принят
-
+  backend ->> frontend: Foydalanuvchi ma’lumotlari va EDS tekshirish natijasi
+  frontend -->> user: Hujjat qabul qilindi / rad etildi
 ```
 
-### 3.2.3. Описание кода status
+### 3.2.3. **Status kodining tavsifi**  
 
-Для `/fontend/mobile`
+#### `/fontend/mobile` uchun:  
 
-| status | Описание |
+| Status | Tavsif |
 |--|--|
-| 0 | Плохой ответ (никогда не должно возвращаться) |
-| 1 | Успешно |
-| 2 | PKCS#7 еще не загружен со стороны ИС “ID-CARD E-IMZO MOBILE” |
-| -1 | Ошибка связанная с Redis (возможно к нему не удалось подключиться) |
-| -2 | Запись по DocumentID не найдена в Redis (возможно истекло время жизни записи) |
-| -9 | Непредвиденная ошибка (смотрите записи в логе E-IMZO-SERVER) |
-| -10 | Cмотрите записи в логе E-IMZO-SERVER |
+| 0 | Yomon javob (hech qachon qaytmasligi kerak) |
+| 1 | Muvaffaqiyatli |
+| 2 | PKCS#7 hali “ID-CARD E-IMZO MOBILE” IS tomonidan yuklanmagan |
+| -1 | Redis bilan bog‘liq xatolik (ehtimol, ulanish amalga oshmagan) |
+| -2 | DocumentID bo‘yicha yozuv Redisda topilmadi (ehtimol, muddati tugagan) |
+| -9 | Kutilmagan xatolik (E-IMZO-SERVER loglarini tekshiring) |
+| -10 | E-IMZO-SERVER loglarini tekshiring |
 
-Для `/backend/mobile`
+#### `/backend/mobile` uchun:  
 
-| status | Описание |
+| Status | Tavsif |
 |--|--|
-| 0 | Плохой ответ (никогда не должно возвращаться) |
-| 1 | Успешно |
-| 2 | PKCS#7 еще не загружен со стороны ИС “ID-CARD E-IMZO MOBILE” |
-| -1 | Ошибка связанная с Redis (возможно к нему не удалось подключиться) |
-| -2 | Запись по DocumentID не найдена в Redis (возможно истекло время жизни записи) |
-| -3 | Cмотрите записи в логе E-IMZO-SERVER |
-| -4 | Структура PKCS#7 документа недейтвительна (никогда не должно возвращаться) |
-| -5 | ЭЦП PKCS#7 документа недействительна |
-| -6 | Сертификат пользователя недействителен |
-| -7 | Сертификат пользователя недействителен на дату и время подписи |
-| -8 | Произошла ошибка при проверки статуса сертификата (смотрите записи в логе E-IMZO-SERVER) |
-| -9 | Превышена разрешенная разность времени в минутах между датой и временем подписания в смартфоне и датой и временем проверки ЭЦП PKCS#7 документа на сервере. Пользователь должен повторить попытку или если интернет соединение медленное, то можно увеличить параметр конфигурации `auth.service.valid.minutes.window` |
-| -10 | Cмотрите записи в логе E-IMZO-SERVER |
-| -11 | Cмотрите записи в логе E-IMZO-SERVER |
-| -99 | Cмотрите записи в логе E-IMZO-SERVER |
-| -100 | Cмотрите записи в логе E-IMZO-SERVER |
+| 0 | Yomon javob (hech qachon qaytmasligi kerak) |
+| 1 | Muvaffaqiyatli |
+| 2 | PKCS#7 hali “ID-CARD E-IMZO MOBILE” IS tomonidan yuklanmagan |
+| -1 | Redis bilan bog‘liq xatolik (ehtimol, ulanish amalga oshmagan) |
+| -2 | DocumentID bo‘yicha yozuv Redisda topilmadi (ehtimol, muddati tugagan) |
+| -3 | E-IMZO-SERVER loglarini tekshiring |
+| -4 | PKCS#7 hujjatining tuzilishi yaroqsiz (hech qachon qaytmasligi kerak) |
+| -5 | PKCS#7 hujjatining raqamli imzosi yaroqsiz |
+| -6 | Foydalanuvchi sertifikati yaroqsiz |
+| -7 | Foydalanuvchi sertifikati imzolangan sana va vaqt bo‘yicha yaroqsiz |
+| -8 | Sertifikat holatini tekshirishda xatolik yuz berdi (E-IMZO-SERVER loglarini tekshiring) |
+| -9 | Imzolash vaqti bilan serverda tekshirilayotgan vaqt o‘rtasidagi ruxsat etilgan farq oshib ketdi. Foydalanuvchi qayta urinish kerak yoki agar internet sekin ishlayotgan bo‘lsa, `auth.service.valid.minutes.window` konfiguratsiya parametrini oshirish mumkin |
+| -10 | E-IMZO-SERVER loglarini tekshiring |
+| -11 | E-IMZO-SERVER loglarini tekshiring |
+| -99 | E-IMZO-SERVER loglarini tekshiring |
+| -100 | E-IMZO-SERVER loglarini tekshiring |
 
-## 3.3. Настройка конфигурации
+---
 
-Допишите следующие параметры в файл конфигурации `config.properties`:
+## **3.3. Konfiguratsiyani sozlash**  
+
+`config.properties` fayliga quyidagi parametrlarni qo‘shing:  
 ```
-# Пропишите свой SiteID
+# O‘z SiteID’ingizni kiriting
 mobile.siteId=0000
 
-# Укажите конфигурацию Redis
+# Redis konfiguratsiyasini kiriting
 mobile.storage.redis.host=127.0.0.1
 mobile.storage.redis.password=test
 mobile.storage.redis.db=1
-
 ```
 
-Перезапустите E-IMZO-SERVER.
+Shundan so‘ng **E-IMZO-SERVER**ni qayta ishga tushiring.  
 
-Для проверки работоспособности REST-API `/frontend/mobile` выполните команду (допустим что ваш домен example.uz):
-
+**REST-API `/frontend/mobile` ishlashini tekshirish uchun quyidagi buyruqni bajaring**  
+(Agar domeningiz `example.uz` bo‘lsa):  
 ```
 curl -X POST https://example.uz/frontend/mobile/auth
 ```
 
-В ответ вернётся JSON-строка
+Javob sifatida JSON matni qaytariladi.
 
 ```
 {"status":1,"message":null,"siteId":"0000","documentId":"B7735734","challange":"AB8C2ED52B12DCBAB3FBD8C11007E4C0C7BF6A2F5818C05DEB61F3EE39052BDC"}
 ```
 
-## 3.4. Описание методов ID-CARD E-IMZO MOBILE REST-API
+## **3.4. ID-CARD E-IMZO MOBILE REST-API metodlari tavsifi**  
 
-### 3.4.1. `/frontend/mobile/upload`
+### **3.4.1. `/frontend/mobile/upload`**  
 
-Метод нужен для того чтобы ИС “ID-CARD E-IMZO MOBILE” отправила PKCS#7 документ. 
+Ushbu metod **"ID-CARD E-IMZO MOBILE"** axborot tizimi tomonidan **PKCS#7 hujjatini jo‘natish** uchun kerak.  
 
-_Например: если название вашего домена_ `example.uz` _то ваш_ `UPLOAD URL` _будет_ `https://example.uz/frontend/mobile/upload`
+📌 **Misol**: Agar domeningiz `example.uz` bo‘lsa, sizning **UPLOAD URL** quyidagicha bo‘ladi:  
+```
+https://example.uz/frontend/mobile/upload
+```
 
-### 3.4.2. `/frontend/mobile/auth`
+---
 
-Метод нужен для генерации случайного значение `Challenge` которое пользоваетль должен будет подписать и создать PKCS#7 документ.
+### **3.4.2. `/frontend/mobile/auth`**  
 
-Пример вызова CURL командой:
+Ushbu metod **tasodifiy `Challenge` qiymatini yaratish** uchun kerak.  
+Foydalanuvchi ushbu `Challenge`ni **imzolashi** va **PKCS#7 hujjatini yaratishi** lozim.  
+
+**CURL orqali chaqirish misoli:**  
 ```
 curl -X POST -v http://127.0.0.1:8080/frontend/mobile/auth
 ```
-Ответ
+
+Javob:
 ```
 {
   "status": 1,
@@ -1034,66 +1045,78 @@ curl -X POST -v http://127.0.0.1:8080/frontend/mobile/auth
   "challange": "F8D2181DC6C02EA819B88FF3EF49BE0C"
 }
 ```
-HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+## **HTTP Kodlar va Ularning Ma'nosi**  
 
-HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+- **HTTP 503** – **E-IMZO-SERVER logini tekshiring.**  
+- **HTTP 400** – So‘rov parametrlarida xatolik mavjud. **E-IMZO-SERVER logini tekshiring.**  
+- **HTTP 200** – HTTP so‘rov muvaffaqiyatli bajarildi.  
 
-HTTP 200 - означает успешное выполнение HTTP запроса
+---
 
-`status` - код состояния (1 - Успешно, иначе ошибка)
+## **Javob Parametrlari**  
 
-`challenge` - случайного значение которое пользоваетль должен будет подписать и создать PKCS#7 документ с помощю E-IMZO ID-CARD.
+- **`status`** – holat kodi (*1 - Muvaffaqiyatli, aks holda xatolik*).  
+- **`challenge`** – foydalanuvchi **imzolashi** va **PKCS#7 hujjatini yaratishi** lozim bo‘lgan tasodifiy qiymat.  
+- **`siteId`** – **Sayt identifikatori** (SiteID).  
+- **`documentId`** – **Hujjat identifikatori** (DocumentID).  
+- **`message`** – Agar `status ≠ 1` bo‘lsa, **xatolik haqida xabar**.  
 
-`siteId` - SiteID.
+---
 
-`documentId` - DocumentID.
+## **Deeplink Yaratish Uchun Kutubxonalar**  
 
-`message` - если `status` не равно 1, то сообщения об ошибки.
+- **JavaScript** (**veb-saytlar uchun**):  
+  [`e-imzo-mobile.js`](https://test.e-imzo.uz/demo/eimzoidcard/js/e-imzo-mobile.js)  
+- **Dart (Flutter loyihalari uchun)**:  
+  [`deepLink()` funksiyasi](https://github.com/qo0p/E-IMZO-INTEGRATION/blob/dev/lib/login_viewmodel.dart)  
+- **Java (Android uchun)**:  
+  [`makeAndCallDeepLink()` funksiyasi](https://github.com/qo0p/SampleAndroidAppCallDeeplinkEIMZO/blob/master/app/src/main/java/uz/yt/sample/myapplication/MainActivity.java)  
 
-Для формирования Deeplink применяется:
-- Javascript-код https://test.e-imzo.uz/demo/eimzoidcard/js/e-imzo-mobile.js для веб-сайта
-- Dart-код https://github.com/qo0p/E-IMZO-INTEGRATION/blob/dev/lib/login_viewmodel.dart функция `deepLink()` для Flutter проекта
-- Java-код https://github.com/qo0p/SampleAndroidAppCallDeeplinkEIMZO/blob/master/app/src/main/java/uz/yt/sample/myapplication/MainActivity.java функция `makeAndCallDeepLink()` для Android проекта
+---
 
-### 3.4.3. `/frontend/mobile/status`
+## **3.4.3. `/frontend/mobile/status`**  
 
-Метод нужен для проверки статуса после передачи по Deeplink.
+Ushbu metod **Deeplink orqali yuborilgandan keyin** **holatni tekshirish** uchun ishlatiladi.  
 
-Пример вызова CURL командой:
+📌 **CURL orqali chaqirish misoli:**  
 ```
 curl -X POST -d 'documentId=BBF3E8C3' -v http://127.0.0.1:8080/frontend/mobile/status
 ```
 
-Тело запроса должно содержать URL-закодированный пареметр `documentId`.
+📌 **So‘rov tanasi (`body`)**:  
+URL-kodlangan holda **`documentId`** parametrini o‘z ichiga olishi kerak.  
 
-Ответ
-```
+📌 **Javob:**  
+```json
 {
   "status": 2
 }
 ```
-HTTP 503 - Посмотрите лог E-IMZO-SERVER.
 
-HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+---
 
-HTTP 200 - означает успешное выполнение HTTP запроса
+## **HTTP Kodlar (`/frontend/mobile/status` metodi uchun)**  
 
-`status` - код состояния (см. 3.2.3. Описание кода status).
+- **HTTP 503** – **E-IMZO-SERVER logini tekshiring.**  
+- **HTTP 400** – So‘rov parametrlarida xatolik bor. **E-IMZO-SERVER logini tekshiring.**  
+- **HTTP 200** – HTTP so‘rov **muvaffaqiyatli bajarildi**.  
 
-`message` - если `status` не равно 1, то сообщения об ошибки.
+📌 **`status`** – **Holat kodi** (bo‘lim **3.2.3.** ga qarang).  
+📌 **`message`** – Agar `status ≠ 1` bo‘lsa, **xatolik haqida xabar**.  
 
-### 3.4.4. `/backend/mobile/authenticate`
+---
 
-Метод нужен для проверки результата идентификации пользователя со стороны Backend после того когда `/frontend/mobile/status` вернет  `{"status": 1}`.
+## **3.4.4. `/backend/mobile/authenticate`**  
 
-Пример вызова CURL командой:
+Ushbu metod **foydalanuvchini autentifikatsiya qilish natijasini tekshirish** uchun ishlatiladi.  
+Bu `/frontend/mobile/status` **`{"status": 1}`** javobini qaytargandan keyin chaqiriladi.  
+
+📌 **CURL orqali chaqirish misoli:**
 ```
 curl -X GET -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -v http://127.0.0.1:8080/backend/mobile/authenticate/2944F1F2
 ```
 
-В HTTP -заголовке  `X-Real-IP` - должен передаваться  IP-Адрес пользователя а в `Host` - должен передаваться доменное имя сайта куда пользователь выполяет Вход.
-
-Ответ:
+HTTP sarlavhasida `X-Real-IP` foydalanuvchining IP-manzili uzatilishi kerak, `Host` da esa foydalanuvchi kirayotgan veb-saytning domen nomi uzatilishi kerak.
 ```
 {
    "status":1,
@@ -1112,67 +1135,71 @@ curl -X GET -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -v http://127.0.0.1:80
    }
 }
 ```
-HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+HTTP 503 - E-IMZO-SERVER loglarini tekshiring.  
 
-HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+HTTP 400 - So‘rov parametrlarida xatolik borligini anglatadi. E-IMZO-SERVER loglarini tekshiring.  
 
-HTTP 200 - означает успешное выполнение HTTP запроса
+HTTP 200 - HTTP so‘rovi muvaffaqiyatli bajarilganligini bildiradi.  
 
-`status` - код состояния (1 - Успешно, иначе ошибка)
+`status` - holat kodi (1 - Muvaffaqiyatli, aks holda xatolik).  
 
-`message` - если `status` не равно 1, то сообщения об ошибки.
+`message` - agar `status` 1 ga teng bo‘lmasa, xatolik haqida xabar.  
 
-`subjectCertificateInfo` - информация о серитификате пользователя.
+`subjectCertificateInfo` - foydalanuvchi sertifikati haqida ma'lumot.  
 
-### 3.4.5. `/frontend/mobile/sign`
+### 3.4.5. `/frontend/mobile/sign`  
 
-Метод нужен для генерации DocumentID для идентификации пользовательского документа, пользоваетль должен будет подписать и создать PKCS#7 документ.
+Ushbu metod foydalanuvchi hujjatini identifikatsiya qilish uchun `DocumentID` yaratish uchun ishlatiladi. Foydalanuvchi ushbu hujjatni imzolashi va PKCS#7 hujjatini yaratishi kerak.  
 
-Пример вызова CURL командой:
-```
+CURL so‘rovi namunasi:  
+```bash
 curl -X POST -v http://127.0.0.1:8080/frontend/mobile/sign
 ```
-Ответ
-```
+Javob:  
+```json
 {
   "status": 1,
   "siteId": "0000",
   "documentId": "850FF727"
 }
 ```
-HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+HTTP 503 - E-IMZO-SERVER loglarini tekshiring.  
 
-HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+HTTP 400 - So‘rov parametrlarida xatolik borligini anglatadi. E-IMZO-SERVER loglarini tekshiring.  
 
-HTTP 200 - означает успешное выполнение HTTP запроса
+HTTP 200 - HTTP so‘rovi muvaffaqiyatli bajarilganligini bildiradi.  
 
-`status` - код состояния (1 - Успешно, иначе ошибка)
+`status` - holat kodi (1 - Muvaffaqiyatli, aks holda xatolik).  
 
-`siteId` - SiteID.
+`siteId` - Sayt identifikatori (SiteID).  
 
-`documentId` - DocumentID.
+`documentId` - Hujjat identifikatori (DocumentID).  
 
-`message` - если `status` не равно 1, то сообщения об ошибки.
+`message` - agar `status` 1 ga teng bo‘lmasa, xatolik haqida xabar.  
 
-Для формирования Deeplink применяется:
-- Javascript-код https://test.e-imzo.uz/demo/eimzoidcard/js/e-imzo-mobile.js для веб-сайта
-- Dart-код https://github.com/qo0p/E-IMZO-INTEGRATION/blob/dev/lib/login_viewmodel.dart функция `deepLink()` для Flutter проекта
-- Java-код https://github.com/qo0p/SampleAndroidAppCallDeeplinkEIMZO/blob/master/app/src/main/java/uz/yt/sample/myapplication/MainActivity.java функция `makeAndCallDeepLink()` для Android проекта
+**Deeplink yaratish uchun quyidagi kodlardan foydalaniladi:**  
+- **JavaScript:** [e-imzo-mobile.js](https://test.e-imzo.uz/demo/eimzoidcard/js/e-imzo-mobile.js) (veb-sayt uchun)  
+- **Dart:** [deepLink() funksiyasi](https://github.com/qo0p/E-IMZO-INTEGRATION/blob/dev/lib/login_viewmodel.dart) (Flutter loyihasi uchun)  
+- **Java:** [makeAndCallDeepLink() funksiyasi](https://github.com/qo0p/SampleAndroidAppCallDeeplinkEIMZO/blob/master/app/src/main/java/uz/yt/sample/myapplication/MainActivity.java) (Android loyihasi uchun)
 
 ### 3.4.6. `/backend/mobile/verify`
 
-Метод нужен для проверки подписи документа пользователя со стороны Backend после того когда `/frontend/mobile/status` вернет  `{"status": 1}`.
+Ushbu metod, `/frontend/mobile/status` `{"status": 1}` javobini qaytarganidan so‘ng, foydalanuvchi hujjatining imzosini Backend tomonidan tekshirish uchun kerak.  
 
-Пример вызова CURL командой:
+**CURL buyruq orqali chaqirish misoli:**  
 ```
 curl -X POST -d 'documentId=850FF727&document=AAAAA...' -H 'X-Real-IP: 1.2.3.4' -H 'Host: example.uz' -v http://127.0.0.1:8080/backend/mobile/verify
 ```
 
-В HTTP -заголовке  `X-Real-IP` - должен передаваться  IP-Адрес пользователя а в `Host` - должен передаваться доменное имя сайта.
+**HTTP sarlavhalari:**  
+- `X-Real-IP` – foydalanuvchining IP-manzili uzatilishi kerak.  
+- `Host` – foydalanuvchi kirayotgan saytning domen nomi uzatilishi kerak.  
 
-Тело запроса должно содержать URL-закодированный пареметр `documentId` и `document` (Base64-закодированный документ пользователя).
+**So‘rov tanasi:**  
+- `documentId` – URL-kodlangan parametr.  
+- `document` – foydalanuvchining Base64-kodlangan hujjati.  
 
-Ответ:
+**Javob:**
 ```
 {
    "status":1,
@@ -1202,147 +1229,144 @@ curl -X POST -d 'documentId=850FF727&document=AAAAA...' -H 'X-Real-IP: 1.2.3.4' 
    "pkcs7Attached":"MIAGC.....AAAAA\u003d\u003d"
 }
 ```
-HTTP 503 - Посмотрите лог E-IMZO-SERVER.
+**HTTP javoblari:**  
 
-HTTP 400 - означает что есть ошибка в параметрах запроса. Посмотрите лог E-IMZO-SERVER.
+- **HTTP 503** – E-IMZO-SERVER loglarini tekshiring.  
+- **HTTP 400** – So‘rov parametrlarida xatolik borligini anglatadi. E-IMZO-SERVER loglarini tekshiring.  
+- **HTTP 200** – HTTP so‘rovi muvaffaqiyatli bajarilganini bildiradi.  
 
-HTTP 200 - означает успешное выполнение HTTP запроса
+**Javob parametrlari:**  
+- `status` – holat kodi (1 – Muvaffaqiyatli, aks holda xatolik).  
+- `message` – agar `status` 1 ga teng bo‘lmasa, xato haqida xabar.  
+- `subjectCertificateInfo` – foydalanuvchi sertifikati haqida ma’lumot.  
+- `verificationInfo` – elektron raqamli imzo (ERI) va sertifikatni tekshirish bo‘yicha qo‘shimcha ma’lumot.  
+- `pkcs7Attached` – vaqt muhri bilan birga PKCS#7 Attached hujjati.  
 
-`status` - код состояния (1 - Успешно, иначе ошибка)
+---
 
-`message` - если `status` не равно 1, то сообщения об ошибки.
+# **4. E-IMZO TUNNEL**  
 
-`subjectCertificateInfo` - информация о серитификате пользователя.
+**E-IMZO TUNNEL** – HTML/JS-ilova va WebSocket-ilova (backend) o‘rtasida **GOST-28147 algoritmi** bo‘yicha shifrlangan tunnel o‘rnatish uchun mo‘ljallangan.  
 
-`verificationInfo` - доп. информация о проверке ЭЦП и сертификата.
-
-`pkcs7Attached` - PKCS#7 Attached документ с штампом вермени. 
-
-
-# 4. E-IMZO TUNNEL
-
-E-IMZO TUNNEL предназначен для установки зашифрованного (по алгоритму ГОСТ-28147) туннеля между HTML/JS-приложением и WebSocket-приложением (backend).
-
-## 4.1. Схема
+## **4.1. Diagramma**  
 
 ```mermaid
 sequenceDiagram
-  actor user as Пользователь
+  actor user as Foydalanuvchi
   participant frontend as HTML/JS
-  participant proxy as Прокси
+  participant proxy as Proksi
   participant eimzo as E-IMZO
   participant backend as E-IMZO-SERVER
   participant api as WebSocket-API
   
-  user ->> frontend: Нажимает кнопку “Создать туннель”
+  user ->> frontend: “Tunnel yaratish” tugmasini bosadi
   frontend ->> eimzo: create_tunnel
-  eimzo ->> user: Запрос пароля ключа ЭЦП
-  user ->> eimzo: Пароля ключа ЭЦП
-  Note over eimzo: Извлекает сертификат
-  eimzo ->> backend: Отправка сертификата Пользователя
-  backend ->> eimzo: Отправка сертификата Домена
-  Note over eimzo: Проверка цепочки сертификата Домена и соответствия названия Домена к сайту домена
-  Note over eimzo,backend: Формирует общий ключ шифрования и шифрует последующие сообщения
-  Note over backend: Устанавливает соединение с WebSocket-API
-  eimzo ->> frontend: Возвращает 127.0.0.1:PORT прокси
-  Note over frontend: Открывает WebSocket по адресу прокси
-  frontend ->> proxy: Отправляет запрос
-  proxy ->> eimzo: Отправляет запрос
-  Note over eimzo: Шшифрует запрос
-  eimzo ->> backend: Отправляет зашифрованный запрос
-  Note over backend: Дешшифрует запрос
-  backend ->> api: Отправляет запрос
-  Note over api: Обработка запроса и формирования ответа
-  api ->> backend: Отправляет ответ
-  Note over backend: Шшифрует ответ
-  backend ->> eimzo: Отправляет зашифрованный ответ
-  Note over eimzo: Дешшифрует ответ
-  eimzo ->> proxy: Отправляет ответ  
-  proxy ->> frontend: Отправляет ответ  
+  eimzo ->> user: E-IMZO kalit parolini so‘rash
+  user ->> eimzo: E-IMZO kalit parolini kiritish
+  Note over eimzo: Sertifikatni ajratib olish
+  eimzo ->> backend: Foydalanuvchi sertifikatini yuborish
+  backend ->> eimzo: Domen sertifikatini yuborish
+  Note over eimzo: Domen sertifikati zanjiri va domen nomining mosligini tekshirish
+  Note over eimzo, backend: Umumiy shifrlash kalitini yaratish va keyingi xabarlarni shifrlash
+  Note over backend: WebSocket-API bilan ulanishni o‘rnatish
+  eimzo ->> frontend: 127.0.0.1:PORT proksi manzilini qaytarish
+  Note over frontend: WebSocket orqali proksi manzilga ulanadi
+  frontend ->> proxy: So‘rov yuborish
+  proxy ->> eimzo: So‘rov yuborish
+  Note over eimzo: So‘rovni shifrlash
+  eimzo ->> backend: Shifrlangan so‘rovni yuborish
+  Note over backend: So‘rovni deshifrlash
+  backend ->> api: So‘rovni yuborish
+  Note over api: So‘rovni qayta ishlash va javobni shakllantirish
+  api ->> backend: Javobni yuborish
+  Note over backend: Javobni shifrlash
+  backend ->> eimzo: Shifrlangan javobni yuborish
+  Note over eimzo: Javobni deshifrlash
+  eimzo ->> proxy: Javobni yuborish  
+  proxy ->> frontend: Javobni yuborish  
 
 ```
-## 4.2. Создание туннеля в E-IMZO
+## 4.2. E-IMZO da tunnel yaratish
 
-Перед созданием туннеля нужно прописать адрес туннеля для конкретного домена в параметрах запуска E-IMZO в файле `run.conf`.
+Tunnel yaratishdan oldin, `run.conf` faylida E-IMZO ishga tushirish parametrlari ichida muayyan domen uchun tunnel manzilini ko‘rsatish kerak.
 
-Пример:
+Misol:
 
 ```
 arguments=-tunnel.6578616d706c652e757a=1.2.3.4:8843
 ```
 
-  - `6578616d706c652e757a` - Hex-кодированое название домена `example.uz`
-  - `1.2.3.4:8843` - IP:PORT туннеля
+- `6578616d706c652e757a` – `example.uz` domenining Hex-kodlangan nomi.
+- `1.2.3.4:8843` – tunnelning IP:PORT manzili.
 
-После, перезапустить E-IMZO и можно будет создавать туннель в домене `example.uz`. (Для других доменов нужно прописать соответствующие параметры).
+Shundan so‘ng, E-IMZO dasturini qayta ishga tushirish kerak va `example.uz` domenida tunnel yaratish mumkin bo‘ladi. (Boshqa domenlar uchun ham mos parametrlarni kiritish zarur).
 
+Tunnel yaratish uchun [`create_tunnel`](http://127.0.0.1:64646/apidoc.html#tunnel.create_tunnel) funksiyasidan foydalaniladi (E-IMZO v4.42 va undan yuqori versiyalarda).
 
-Для создание туннеля применяется функция [`create_tunnel`](http://127.0.0.1:64646/apidoc.html#tunnel.create_tunnel) (E-IMZO-v4.42 и выше)
-
-    CAPIWS.callFunction({
-        plugin    :"tunnel",
-        name      :"create_tunnel",
-        arguments :[
-          //Идентификатор адреса назначения (настраивается на сервере)
-          dst_id,
-          //Идентификатор ключа для генерации общего секретного ключа шифрования (полученный из фукнции других плагинов)
-          id
-        ]
-      },
-      function(event, data){
-          console.log(data);
-          if (data.success) {
-            // Успешно
-            var address = data.address;
-            // Откройте WebSocket соединение по адресу address 
-
-
-          } else {
-            // Ошибка обработки в E-IMZO
-            window.alert(data.reason);
-          }
-      },
-      function(error){
-          // Ошибка WebSocket соединения
-          window.alert(error);
-      }
-    );
-    
-
-Параметр `id`:
- - Если нужно создать туннель ключем PFX, то `id` нужно получить из функции `load_key`
- - Если нужно создать туннель ключем ID-карты, то `id` = `"idcard"`
-
- Параметр `dst_id` - настраивается в конфигурации E-IMZO-SERVER и указывает на IP:PORT WebSocket-API
-
-Смотрите пример https://test.e-imzo.uz/demo/tunnel.html
+	CAPIWS.callFunction({
+	    plugin    :"tunnel",
+	    name      :"create_tunnel",
+	    arguments :[
+	      // Manzil identifikatori (serverda sozlangan)
+	      dst_id,
+	      // Umumiy maxfiy shifrlash kalitini yaratish uchun kalit identifikatori
+	      id
+	    ]
+	  },
+	  function(event, data){
+	      console.log(data);
+	      if (data.success) {
+	        // Muvaffaqiyatli bajarildi
+	        var address = data.address;
+	        // Ushbu manzil bo‘yicha WebSocket ulanishini oching
+	
+	
+	      } else {
+	        // E-IMZO ishlov berish xatosi
+	        window.alert(data.reason);
+	      }
+	  },
+	  function(error){
+	      // WebSocket ulanish xatosi
+	      window.alert(error);
+	  }
+	);
 
 
-Созданный туннель является одноразовым (т.е. на одно подключение) и вторая попытка открытия WebSocket соединение по адресу `address` будет безуспешной.
-Для повторного создание туннеля и получения нового `address` а следует повторно вызвать функцию [`create_tunnel`](http://127.0.0.1:64646/apidoc.html#tunnel.create_tunnel).
+### Parametr `id`:
+- Agar tunnel PFX kaliti bilan yaratilishi kerak bo‘lsa, `id` `load_key` funksiyasidan olinadi.  
+- Agar tunnel ID-karta kaliti bilan yaratilishi kerak bo‘lsa, `id` = `"idcard"` bo‘ladi.  
 
+### Parametr `dst_id`  
+Bu parametr E-IMZO-SERVER konfiguratsiyasida sozlanadi va WebSocket-API uchun IP:PORT manzilini ko‘rsatadi.  
 
-## 4.3. Настройка E-IMZO-SERVER
+Namuna: [https://test.e-imzo.uz/demo/tunnel.html](https://test.e-imzo.uz/demo/tunnel.html)  
 
-Содержание файла конфигурации `config.properties`:
+Yaratilgan tunnel bir martalik bo‘lib, faqat bitta ulanish uchun mo‘ljallangan. `address` orqali WebSocket ulanishining ikkinchi urinishi muvaffaqiyatsiz bo‘ladi.  
+Tunnelni qayta yaratish va yangi `address` olish uchun [`create_tunnel`](http://127.0.0.1:64646/apidoc.html#tunnel.create_tunnel) funksiyasini qayta chaqirish kerak.  
+
+---
+
+## 4.3. E-IMZO-SERVER sozlamalari  
+
+`config.properties` konfiguratsiya faylining mazmuni:  
 
 ```
-# включить туннель
+# Tunnelni yoqish
 tunnel.enabled=yes
 
-# слушать со всех IP-адресов сетевых карт и слушать порт 
+# Barcha tarmoq kartalari IP-manzillari orqali eshitish va portni sozlash
 tunnel.listen.ip=0.0.0.0
 tunnel.listen.port=8843
 
-# директория хранит ключи и сертификаты домена (например example.uz)
+# Domen kalitlari va sertifikatlari saqlanadigan papka (masalan, example.uz)
 tunnel.servers.dir=tunnel/servers
 
-# хранилище доверенных сертификатов
+# Ishonchli sertifikatlar ombori
 tunnel.truststore.password=12346578
 tunnel.truststore.file=tunnel/truststore.jks
 
-# идентификатор адреса назначения (dst_id = 0)
+# Manzil identifikatori (dst_id = 0)
 tunnel.destination.0.host=192.168.1.11
 tunnel.destination.0.port=8080
-
 ```
