@@ -1,17 +1,26 @@
-# Установка demo сайта на компьютер разработчика для ОС Windows в целях тестирования и изучения
+# Windows operatsion tizimida ishlab chiquvchilar uchun demo saytni o‘rnatish va test qilish  
 
-Убедитесь что на компьютере не заняты TCP-порты 80,8080,9123.
+Kompyuteringizda **TCP-portlari 80, 8080, 9123 band emasligiga** ishonch hosil qiling.  
 
-## 1. NGINX
+---
 
-Скачайте nginx с сайта http://nginx.org/ru/download.html
+## 1. NGINX o‘rnatish  
 
-В инструкции применяется версия _1.26.1_ (http://nginx.org/download/nginx-1.26.1.zip)
+1. **NGINX yuklab oling**:  
+   Rasmiy saytdan yuklab oling: [http://nginx.org/ru/download.html](http://nginx.org/ru/download.html)  
 
-Распакуйте `nginx-1.26.1.zip` в `c:\` диск и переменуйте папку `c:\nginx-1.26.1` в `c:\nginx`
+2. Ushbu qo‘llanmada **_1.26.1_ versiyasi** ishlatiladi:  
+   Yuklab olish: [http://nginx.org/download/nginx-1.26.1.zip](http://nginx.org/download/nginx-1.26.1.zip)  
 
-Откройте файл `c:\nginx\conf\nginx.conf` и измените блок `server` соответственно между `# !!! НАЧАЛО ИЗМЕНЕНИЙ !!! #` и `# !!! КОНЕЦ ИЗМЕНЕНИЙ !!! #`
+3. **Arxivni oching**:  
+   `nginx-1.26.1.zip` faylini `C:\` diskka chiqarib oling.  
 
+4. **Papka nomini o‘zgartiring**:  
+   `C:\nginx-1.26.1` papkasini `C:\nginx` deb o‘zgartiring.  
+
+5. **Konfiguratsiya faylini tahrirlash**:  
+   `C:\nginx\conf\nginx.conf` faylini oching va `server` blokini **`# !!! НАЧАЛО ИЗМЕНЕНИЙ !!! #` va `# !!! КОНЕЦ ИЗМЕНЕНИЙ !!! #`** orasida mos ravishda o‘zgartiring.
+   
 ```
 server {
         listen       80;
