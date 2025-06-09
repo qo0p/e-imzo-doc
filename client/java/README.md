@@ -2,41 +2,26 @@
 
 ## Требования
 
-Для применения библиотеки в Java проекте есть 2 способа:
+Для применения библиотеки в Java проекте подключить библиотеку с помощью Maven
 
- - Подключите `e-imzo-server-client-1.4-SNAPSHOT.jar` и `gson-2.8.6.jar` к Java проекту.
+```
+<dependency>
+    <groupId>io.github.qo0p</groupId>
+    <artifactId>e-imzo-server-client</artifactId>
+    <version>1.7.6</version>
+</dependency>
+```
 
-    Импортируйте Java-классы
+Импортируйте Java-классы
 
-    ```
+```
 
-    import uz.yt.eimzo.server.client.Client;
-    import uz.yt.eimzo.server.client.http.HttpClient;
-    import uz.yt.eimzo.server.client.json.AuthJsonResponse;
-    import uz.yt.eimzo.server.client.json.Pkcs7VerifyJsonResponse;
+import io.github.qo0p.eimzo.server.client.Client;
+import io.github.qo0p.eimzo.server.client.http.HttpClient;
+import io.github.qo0p.eimzo.server.client.json.AuthJsonResponse;
+import io.github.qo0p.eimzo.server.client.json.Pkcs7VerifyJsonResponse;
 
-    ```
-
-- Также можно подключить библиотеку через http://central.sonatype.com
-
-    ```
-    <dependency>
-        <groupId>io.github.qo0p</groupId>
-        <artifactId>e-imzo-server-client</artifactId>
-        <version>1.7.5</version>
-    </dependency>
-    ```
-
-    Импортируйте Java-классы
-
-    ```
-
-    import io.github.qo0p.eimzo.server.client.Client;
-    import io.github.qo0p.eimzo.server.client.http.HttpClient;
-    import io.github.qo0p.eimzo.server.client.json.AuthJsonResponse;
-    import io.github.qo0p.eimzo.server.client.json.Pkcs7VerifyJsonResponse;
-
-    ```
+```
 
 ## Пример вызова методов
 
