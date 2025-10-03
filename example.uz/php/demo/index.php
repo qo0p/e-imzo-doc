@@ -23,7 +23,9 @@ unset($_SESSION["USER_INFO"]);
             <input type="radio" id="pfx" name="keyType" value="pfx" onchange="keyType_changed()" checked="checked">
             <label for="pfx">PFX</label> - <select name="key" onchange="cbChanged(this)"></select><br>
             <input type="radio" id="idcard" name="keyType" value="idcard" onchange="keyType_changed()">
-            <label for="idcard">ID-card</label> - <label id="plugged">не подключена</label><br>
+            <label for="idcard">USB-Token или ID-card</label> - <label id="plugged">не подключена</label><br>
+            <input type="radio" id="baikey" name="keyType" value="baikey" onchange="keyType_changed()">
+            <label for="baikey">BAIK-Token</label><br>
             <br>
 
             <button onclick="signin()" type="button" id="signButton">Вход</button><br>
@@ -133,7 +135,15 @@ unset($_SESSION["USER_INFO"]);
 
             var keyType_changed = function(){
                 var keyType = document.testform.keyType.value;
-                document.getElementById('signButton').innerHTML = keyType==="pfx" ? "Вход ключем PFX" : "Вход ключем ID-card";
+                if(keyType==="pfx"){
+                    document.getElementById('signButton').innerHTML = "Вход ключем PFX";
+                }
+                if(keyType==="idcard"){
+                    document.getElementById('signButton').innerHTML = "Вход ключем USB-Token или ID-card";
+                }
+                if(keyType==="baikey"){
+                    document.getElementById('signButton').innerHTML = "Вход ключем BAIK-Token";
+                }
             };
 
             keyType_changed();
@@ -156,6 +166,14 @@ unset($_SESSION["USER_INFO"]);
                     var keyType = document.testform.keyType.value;
                     if(keyType==="idcard"){
                         var keyId = "idcard";
+
+                        auth(keyId, challenge, function(redirect){
+                            window.location.href = redirect;
+                            uiShowProgress();
+                        });
+
+                    } else if(keyType==="baikey"){
+                        var keyId = "baikey";
 
                         auth(keyId, challenge, function(redirect){
                             window.location.href = redirect;
