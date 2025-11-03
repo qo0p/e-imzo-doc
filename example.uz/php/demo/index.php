@@ -12,7 +12,7 @@ unset($_SESSION["USER_INFO"]);
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <title></title>
         <script src="e-imzo.js" type="text/javascript"></script> 
-        <script src="e-imzo-client.js" type="text/javascript"></script> 
+        <script src="e-imzo-client.js?v=1.2" type="text/javascript"></script> 
         <script src="micro-ajax.js" type="text/javascript"></script> 
         <script src="e-imzo-init.js" type="text/javascript"></script> 
     </head>
@@ -23,9 +23,11 @@ unset($_SESSION["USER_INFO"]);
             <input type="radio" id="pfx" name="keyType" value="pfx" onchange="keyType_changed()" checked="checked">
             <label for="pfx">PFX</label> - <select name="key" onchange="cbChanged(this)"></select><br>
             <input type="radio" id="idcard" name="keyType" value="idcard" onchange="keyType_changed()">
-            <label for="idcard">USB-Token или ID-card</label> - <label id="plugged">не подключена</label><br>
+            <label for="idcard">EIMZO-Token или ID-card</label> - <label id="plugged_idcard">не подключена</label><br>
             <input type="radio" id="baikey" name="keyType" value="baikey" onchange="keyType_changed()">
-            <label for="baikey">BAIK-Token</label><br>
+            <label for="baikey">BAIK-Token</label> - <label id="plugged_baikey">не подключена</label><br>
+            <input type="radio" id="ckc" name="keyType" value="ckc" onchange="keyType_changed()">
+            <label for="ckc">CryptKeyContainer - для всех совместимых токенов - <label id="plugged_ckc">не подключена</label></label><br>
             <br>
 
             <button onclick="signin()" type="button" id="signButton">Вход</button><br>
@@ -78,7 +80,25 @@ unset($_SESSION["USER_INFO"]);
                     }
                 });
                 EIMZOClient.idCardIsPLuggedIn(function(yes){
-                    document.getElementById('plugged').innerHTML = yes ? 'подключена': 'не подключена';
+                    document.getElementById('plugged_idcard').innerHTML = yes ? 'подключена': 'не подключена';
+                },function(e, r){
+                    if(e){
+                        uiShowMessage(errorCAPIWS + " : " + e);
+                    } else {
+                        console.log(r);
+                    }
+                })
+                EIMZOClient.isBAIKTokenPLuggedIn(function(yes){
+                    document.getElementById('plugged_baikey').innerHTML = yes ? 'подключена': 'не подключена';
+                },function(e, r){
+                    if(e){
+                        uiShowMessage(errorCAPIWS + " : " + e);
+                    } else {
+                        console.log(r);
+                    }
+                })
+                EIMZOClient.isCKCPLuggedIn(function(yes){
+                    document.getElementById('plugged_ckc').innerHTML = yes ? 'подключена': 'не подключена';
                 },function(e, r){
                     if(e){
                         uiShowMessage(errorCAPIWS + " : " + e);
@@ -139,10 +159,13 @@ unset($_SESSION["USER_INFO"]);
                     document.getElementById('signButton').innerHTML = "Вход ключем PFX";
                 }
                 if(keyType==="idcard"){
-                    document.getElementById('signButton').innerHTML = "Вход ключем USB-Token или ID-card";
+                    document.getElementById('signButton').innerHTML = "Вход ключем EIMZO-Token или ID-card";
                 }
                 if(keyType==="baikey"){
                     document.getElementById('signButton').innerHTML = "Вход ключем BAIK-Token";
+                }
+                if(keyType==="ckc"){
+                    document.getElementById('signButton').innerHTML = "Вход любым совместимым токеном";
                 }
             };
 
@@ -174,6 +197,14 @@ unset($_SESSION["USER_INFO"]);
 
                     } else if(keyType==="baikey"){
                         var keyId = "baikey";
+
+                        auth(keyId, challenge, function(redirect){
+                            window.location.href = redirect;
+                            uiShowProgress();
+                        });
+
+                    } else if(keyType==="ckc"){
+                        var keyId = "ckc";
 
                         auth(keyId, challenge, function(redirect){
                             window.location.href = redirect;
