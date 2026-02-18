@@ -14,19 +14,25 @@ unset($_SESSION["USER_INFO"]);
         <script src="e-imzo.js" type="text/javascript"></script> 
         <script src="e-imzo-client.js?v=1.2" type="text/javascript"></script> 
         <script src="micro-ajax.js" type="text/javascript"></script> 
-        <script src="e-imzo-init.js?v=1.0" type="text/javascript"></script> 
+        <script src="e-imzo-init.js" type="text/javascript"></script> 
     </head>
     <body>
-        <p>Вход по ключу из PFX-файла (работает только с тестовыми ключами)</p>
         <form name="testform">
-            <select name="key" onchange="cbChanged(this)"></select>
-            <button onclick="signinPFX()" type="button" id="signinPFXButton">Вход</button><br>
-        </form>
-        <p>Вход по ключу из USB-токена (работает только с тестовыми ключами)</p>
-        <button onclick="signinToken()" type="button" id="signinTokenButton">Вход</button><br>
-        <label id="progress" style="color: green;"></label>
-        <label id="message" style="color: red;"></label>
-        
+            <label id="message" style="color: red;"></label>
+            <p>Выберите тип ключа: (работает только с тестовыми ключами)</p>
+            <input type="radio" id="pfx" name="keyType" value="pfx" onchange="keyType_changed()" checked="checked">
+            <label for="pfx">PFX</label> - <select name="key" onchange="cbChanged(this)"></select><br>
+            <input type="radio" id="idcard" name="keyType" value="idcard" onchange="keyType_changed()">
+            <label for="idcard">EIMZO-Token или ID-card</label> - <label id="plugged_idcard">не подключена</label><br>
+            <input type="radio" id="baikey" name="keyType" value="baikey" onchange="keyType_changed()">
+            <label for="baikey">BAIK-Token</label> - <label id="plugged_baikey">не подключена</label><br>
+            <input type="radio" id="ckc" name="keyType" value="ckc" onchange="keyType_changed()">
+            <label for="ckc">CryptKeyContainer - для всех совместимых токенов - <label id="plugged_ckc">не подключена</label></label><br>
+            <br>
+
+            <button onclick="signin()" type="button" id="signButton">Вход</button><br>
+            <label id="progress" style="color: green;"></label>
+       </form>
 
         <script language="javascript">
             
@@ -66,10 +72,40 @@ unset($_SESSION["USER_INFO"]);
                     uiFillCombo(items);
                     uiLoaded();
                     uiComboSelect(firstId);
-                },uiHandleError);  
-                if(!EIMZOClient.NEW_API3){
-                    alert("E-IMZO version should be 4.86 or newer");
-                }   
+                },function(e, r){
+                    if(e){
+                        uiShowMessage(errorCAPIWS + " : " + e);
+                    } else {
+                        console.log(r);
+                    }
+                });
+                EIMZOClient.idCardIsPLuggedIn(function(yes){
+                    document.getElementById('plugged_idcard').innerHTML = yes ? 'подключена': 'не подключена';
+                },function(e, r){
+                    if(e){
+                        uiShowMessage(errorCAPIWS + " : " + e);
+                    } else {
+                        console.log(r);
+                    }
+                })
+                EIMZOClient.isBAIKTokenPLuggedIn(function(yes){
+                    document.getElementById('plugged_baikey').innerHTML = yes ? 'подключена': 'не подключена';
+                },function(e, r){
+                    if(e){
+                        uiShowMessage(errorCAPIWS + " : " + e);
+                    } else {
+                        console.log(r);
+                    }
+                })
+                EIMZOClient.isCKCPLuggedIn(function(yes){
+                    document.getElementById('plugged_ckc').innerHTML = yes ? 'подключена': 'не подключена';
+                },function(e, r){
+                    if(e){
+                        uiShowMessage(errorCAPIWS + " : " + e);
+                    } else {
+                        console.log(r);
+                    }
+                })
             }
             
             var uiComboSelect = function(itm){
@@ -79,10 +115,8 @@ unset($_SESSION["USER_INFO"]);
                 }
             }
             
-            var cbChanged = function(c){  
-                if(document.getElementById('keyId')) {             
-                    document.getElementById('keyId').innerHTML = '';
-                }
+            var cbChanged = function(c){                
+                document.getElementById('keyId').innerHTML = '';
             }
             
             var uiClearCombo = function(){    
@@ -119,6 +153,24 @@ unset($_SESSION["USER_INFO"]);
                 return itm;
             }
 
+            var keyType_changed = function(){
+                var keyType = document.testform.keyType.value;
+                if(keyType==="pfx"){
+                    document.getElementById('signButton').innerHTML = "Вход ключем PFX";
+                }
+                if(keyType==="idcard"){
+                    document.getElementById('signButton').innerHTML = "Вход ключем EIMZO-Token или ID-card";
+                }
+                if(keyType==="baikey"){
+                    document.getElementById('signButton').innerHTML = "Вход ключем BAIK-Token";
+                }
+                if(keyType==="ckc"){
+                    document.getElementById('signButton').innerHTML = "Вход любым совместимым токеном";
+                }
+            };
+
+            keyType_changed();
+
             var uiShowProgress = function(){
                 var l = document.getElementById('progress');
                 l.innerHTML = 'Идет подписание, ждите.';
@@ -130,43 +182,54 @@ unset($_SESSION["USER_INFO"]);
                 l.innerHTML = '';                
             };
 
-            signinPFX = function () {
+            signin = function () {
                 uiShowProgress();
                 
                 getChallenge(function(challenge){                
-                    
-                    var itm = document.testform.key.value;
-                    if (itm) {                 
-                        var id = document.getElementById(itm);   
-                        var vo = JSON.parse(id.getAttribute('vo'));                        
-                        
-                        EIMZOClient.loadKey(vo, function(id){                            
-                            var keyId = id;
+                    var keyType = document.testform.keyType.value;
+                    if(keyType==="idcard"){
+                        var keyId = "idcard";
+
+                        auth(keyId, challenge, function(redirect){
+                            window.location.href = redirect;
+                            uiShowProgress();
+                        });
+
+                    } else if(keyType==="baikey"){
+                        var keyId = "baikey";
+
+                        auth(keyId, challenge, function(redirect){
+                            window.location.href = redirect;
+                            uiShowProgress();
+                        });
+
+                    } else if(keyType==="ckc"){
+                        var keyId = "ckc";
+
+                        auth(keyId, challenge, function(redirect){
+                            window.location.href = redirect;
+                            uiShowProgress();
+                        });
+
+                    } else {
+                        var itm = document.testform.key.value;
+                        if (itm) {                 
+                            var id = document.getElementById(itm);   
+                            var vo = JSON.parse(id.getAttribute('vo'));                        
                             
-                            auth(keyId, challenge, function(redirect){
-                                window.location.href = redirect;
-                                uiShowProgress();
-                            });
+                            EIMZOClient.loadKey(vo, function(id){                            
+                                var keyId = id;
+                               
+                                auth(keyId, challenge, function(redirect){
+                                    window.location.href = redirect;
+                                    uiShowProgress();
+                                });
 
-                        }, uiHandleError);                                 
-                    } else {                        
-                        uiHideProgress();
+                            }, uiHandleError);                                 
+                        } else {                        
+                            uiHideProgress();
+                        }
                     }
-                    
-                }); 
-            }
-
-            signinToken = function () {
-                uiShowProgress();
-                
-                getChallenge(function(challenge){               
-                    
-                    var keyId = "ckc";
-
-                    auth(keyId, challenge, function(redirect){
-                        window.location.href = redirect;
-                        uiShowProgress();
-                    });                    
                 });                
             };
 
