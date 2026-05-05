@@ -1135,7 +1135,7 @@ HTTP 200 - означает успешное выполнение HTTP запр�
 
 `message` - если `status` не равно 1, то сообщения об ошибки.
 
-### 3.4.4. `/backend/mobile/authenticate`
+### 3.4.4. `/backend/mobile/authenticate/{DocumentID}`
 
 Метод нужен для проверки результата идентификации пользователя со стороны Backend после того когда `/frontend/mobile/status` вернет  `{"status": 1}`.
 

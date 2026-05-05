@@ -22,8 +22,14 @@ $host = $_SERVER['HTTP_HOST'];
 
 $headers = array('Host: '.$host, 'X-Real-IP: '.$user_ip);
 
+$documentId = $_GET['documentId'];
+
+if (!preg_match('/^[a-zA-Z0-9_-]+$/', $documentId)) {
+    die('Invalid documentId');
+}
+
 $ch = curl_init();
-$url = $auth_url.$_GET['documentId'];
+$url = $auth_url.$documentId;
 curl_setopt($ch,CURLOPT_URL,$url);
 curl_setopt($ch,CURLOPT_HTTPHEADER, $headers);
 curl_setopt($ch,CURLOPT_POST, 0);                
