@@ -1070,6 +1070,11 @@ curl -X POST https://example.uz/frontend/mobile/auth
 
 _Например: если название вашего домена_ `example.uz` _то ваш_ `UPLOAD URL` _будет_ `https://example.uz/frontend/mobile/upload`
 
+⚠ **ВАЖНО !!!** 
+
+Ваш `UPLOAD URL` `https://example.uz/frontend/mobile/upload` проксируется через `nginx` (см. Раздел 2.2) на REST-API метод `/frontend/mobile/upload` `e-imzo-server`. 
+Изменения вашего `UPLOAD URL` на другое, например `https://example.uz/abcde/frontend/mobile/upload` выдаст ошибку HTTP 404 т.к. в `e-imzo-server` нет REST-API метода `/abcde/frontend/mobile/upload`.
+
 ### 3.4.2. `/frontend/mobile/auth`
 
 Метод нужен для генерации случайного значение `Challenge` которое пользоваетль должен будет подписать и создать PKCS#7 документ.
