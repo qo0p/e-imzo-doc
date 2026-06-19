@@ -8,7 +8,7 @@
 <dependency>
     <groupId>io.github.qo0p</groupId>
     <artifactId>e-imzo-server-client</artifactId>
-    <version>1.7.7</version>
+    <version>1.7.8</version>
 </dependency>
 ```
 

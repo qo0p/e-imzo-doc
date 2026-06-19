@@ -904,7 +904,9 @@ E-IMZO ID-CARD REST-API предоставляет REST-API методы к ко
 
 ## 3.2. Принцип работы
 
-Демо сайт и пример https://test.e-imzo.uz/demo/eimzoidcard/
+Демо сайт и пример на PHP https://test.e-imzo.uz/demo/eimzoidcard/
+
+Пример на Java https://github.com/mkbakhodirov/e-imzo-id-card-guice
 
 ### 3.2.1. Идентификация Пользователя
 
