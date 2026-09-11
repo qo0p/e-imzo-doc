@@ -73,7 +73,7 @@ if($httpcode == 200) {
     }
 } else {
     ?><div class="alert alert-danger" role="alert">
-      <?=$obj->{"response"}?>
+      <?=htmlspecialchars($response === false ? curl_error($ch) : $response, ENT_QUOTES, 'UTF-8')?>
       </div><?
 }
 curl_close ($ch);

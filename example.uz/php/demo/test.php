@@ -115,8 +115,10 @@ unset($_SESSION["USER_INFO"]);
                 }
             }
             
-            var cbChanged = function(c){                
-                document.getElementById('keyId').innerHTML = '';
+            var cbChanged = function(c){
+                if(document.getElementById('keyId')) {
+                    document.getElementById('keyId').innerHTML = '';
+                }
             }
             
             var uiClearCombo = function(){    

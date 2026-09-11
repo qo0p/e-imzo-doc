@@ -24,17 +24,27 @@ curl_setopt($ch,CURLOPT_CONNECTTIMEOUT ,3);
 curl_setopt($ch,CURLOPT_TIMEOUT, 20);
 $response = curl_exec($ch);
 $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+header('Content-Type: application/json; charset=UTF-8');
 if($httpcode == 200) {
     $jr = json_decode($response);
     if($jr->{"status"} != 1){
-        ?>{"status":<?=$jr->{"status"}?>,"message":"<?=addslashes($jr->{"message"})?>"}<?
+        echo json_encode(array(
+            "status" => $jr->{"status"},
+            "message" => $jr->{"message"}
+        ));
     } else {
         $_SESSION["USER_INFO"] = json_encode($jr->{"subjectCertificateInfo"});
         $_SESSION["KEY_ID"] = $keyId;
-        ?>{"status":1,"redirect":"cabinet.php"}<?
+        echo json_encode(array(
+            "status" => 1,
+            "redirect" => "cabinet.php"
+        ));
     }
 } else {
-    ?>{"status":0,"message":"<?=addslashes($response)?>"}<?
+    echo json_encode(array(
+        "status" => 0,
+        "message" => $response === false ? curl_error($ch) : $response
+    ));
 }
 curl_close ($ch);
 

@@ -172,12 +172,13 @@ session_start();
                     try {
                         var data = JSON.parse(data);
                         if (data.status != 1) {
-                            uiShowMessage(data.status + " - " + s.message);
+                            uiShowMessage(data.status + " - " + data.message);
                             return;
                         }
                         pkcs7wtst = data.pkcs7b64;
                     } catch (e) {
                         uiShowMessage(s.status + " - " + s.statusText + "<br />" + e);
+                        return;
                     }
                     callback(pkcs7wtst);
                 },pkcs7);
@@ -202,12 +203,13 @@ session_start();
                     try {
                         var data = JSON.parse(data);
                         if (data.status != 1) {
-                            uiShowMessage(data.status + " - " + s.message);
+                            uiShowMessage(data.status + " - " + data.message);
                             return;
                         }
                         result = data.pkcs7Info;
                     } catch (e) {
                         uiShowMessage(s.status + " - " + s.statusText + "<br />" + e);
+                        return;
                     }
                     callback(result);
                 }, 'pkcs7wtst=' + encodeURIComponent(pkcs7wtst) + (detached ? '&data64=' + encodeURIComponent(data64) : ""));  

@@ -39,10 +39,14 @@ curl_setopt($ch,CURLOPT_CONNECTTIMEOUT ,3);
 curl_setopt($ch,CURLOPT_TIMEOUT, 20);
 $response = curl_exec($ch);
 $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+header('Content-Type: application/json; charset=UTF-8');
 if($httpcode == 200) {
     print($response);
 } else {
-    ?>{"status":0,"message":"<?=addslashes($response)?>"}<?
+    echo json_encode(array(
+        "status" => 0,
+        "message" => $response === false ? curl_error($ch) : $response
+    ));
 }
 curl_close ($ch);
 
