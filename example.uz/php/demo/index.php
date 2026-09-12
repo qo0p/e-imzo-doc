@@ -7,26 +7,49 @@ unset($_SESSION["USER_INFO"]);
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="ru">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <title></title>
-        <script src="e-imzo.js" type="text/javascript"></script> 
-        <script src="e-imzo-client.js?v=1.2" type="text/javascript"></script> 
-        <script src="micro-ajax.js" type="text/javascript"></script> 
-        <script src="e-imzo-init.js?v=1.0" type="text/javascript"></script> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>E-IMZO Demo — Вход</title>
+        <link rel="stylesheet" href="demo.css">
+        <script src="e-imzo.js" type="text/javascript"></script>
+        <script src="e-imzo-client.js?v=1.2" type="text/javascript"></script>
+        <script src="micro-ajax.js" type="text/javascript"></script>
+        <script src="e-imzo-init.js?v=1.0" type="text/javascript"></script>
     </head>
     <body>
-        <p>Вход по ключу из PFX-файла (работает только с тестовыми ключами)</p>
-        <form name="testform">
-            <select name="key" onchange="cbChanged(this)"></select>
-            <button onclick="signinPFX()" type="button" id="signinPFXButton">Вход</button><br>
-        </form>
-        <p>Вход по ключу из USB-токена (работает только с тестовыми ключами)</p>
-        <button onclick="signinToken()" type="button" id="signinTokenButton">Вход</button><br>
-        <label id="progress" style="color: green;"></label>
-        <label id="message" style="color: red;"></label>
-        
+        <main class="page">
+            <header class="brand">
+                <div class="brand__mark">E-<span>IMZO</span></div>
+                <p class="brand__tag">Демонстрация входа по электронной цифровой подписи</p>
+            </header>
+
+            <section class="panel">
+                <h1 class="panel__title">Вход по PFX</h1>
+                <p class="panel__hint">Работает только с тестовыми ключами</p>
+                <form name="testform" class="stack" onsubmit="return false;">
+                    <label class="field">
+                        <span>Сертификат</span>
+                        <select name="key" onchange="cbChanged(this)"></select>
+                    </label>
+                    <div class="row">
+                        <button onclick="signinPFX()" type="button" id="signinPFXButton" class="btn">Вход</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="panel">
+                <h2 class="panel__title">Вход по USB-токену</h2>
+                <p class="panel__hint">CryptKeyContainer — совместимые токены и ID-карта</p>
+                <button onclick="signinToken()" type="button" id="signinTokenButton" class="btn">Вход</button>
+            </section>
+
+            <div id="progress" class="status status--progress"></div>
+            <div id="message" class="status status--message"></div>
+
+            <p class="footer-note">Требуется установленный E-IMZO и тестовый ключ</p>
+        </main>
 
         <script language="javascript">
             

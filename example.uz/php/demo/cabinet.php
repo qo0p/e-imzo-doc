@@ -5,53 +5,130 @@ session_start();
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="ru">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <title></title>
-        <script src="e-imzo.js" type="text/javascript"></script> 
-        <script src="e-imzo-client.js" type="text/javascript"></script> 
-        <script src="micro-ajax.js" type="text/javascript"></script> 
-        <script src="e-imzo-init.js" type="text/javascript"></script> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>E-IMZO Demo — Кабинет</title>
+        <link rel="stylesheet" href="demo.css">
+        <script src="e-imzo.js" type="text/javascript"></script>
+        <script src="e-imzo-client.js" type="text/javascript"></script>
+        <script src="micro-ajax.js" type="text/javascript"></script>
+        <script src="e-imzo-init.js" type="text/javascript"></script>
     </head>
     <body>
 
         <?
 
         if(!isset($_SESSION["USER_INFO"])){
-            ?><h3>You are not authorized</h3><a href="index.php">SignIn</a><?    
+            ?>
+            <main class="page">
+                <header class="brand">
+                    <div class="brand__mark">E-<span>IMZO</span></div>
+                    <p class="brand__tag">Демонстрация подписания документов</p>
+                </header>
+                <section class="panel auth-gate">
+                    <h3>Вы не авторизованы</h3>
+                    <p>Войдите с помощью электронной цифровой подписи</p>
+                    <a class="btn" href="index.php">Войти</a>
+                </section>
+            </main>
+            <?
             exit();
         }
 
         ?>
 
-        UserInfo: <div id="userInfo"><?=$_SESSION["USER_INFO"]?></div>
+        <main class="page page--wide">
+            <header class="brand">
+                <div class="brand__mark">E-<span>IMZO</span></div>
+                <p class="brand__tag">Кабинет — подписание и проверка PKCS#7</p>
+            </header>
 
-        <form name="testform">
-            <label id="message" style="color: red;"></label>
-            <br />
-            <p>Выберите тип подписанного документа:</p>
-            <input type="radio" id="attached" name="pkcs7Type" value="attached" onchange="pkcs7Type_changed()" checked="checked"><label for="attached">PKCS#7/Attached</label><br />
-            <input type="radio" id="detached" name="pkcs7Type" value="detached" onchange="pkcs7Type_changed()"><label for="detached">PKCS#7/Detached</label><br>
-            <br />
-            Текст для подписи <br />
-            <textarea name="data"></textarea><br />
-            <button onclick="sign()" type="button" id="signButton">Подписать Текст</button><br />
-            <br />
-            Файл для подписи <br />
-            <input type="file" id="fileInput" accept="*/*"><br />
-            <textarea name="fileData64"></textarea><br />
-            <button onclick="signFile()" type="button" id="signFileButton">Подписать Файл</button><br />
-            <label id="progress"></label>
-            <br />
-            ID ключа: <label id="keyId"><?=$_SESSION["KEY_ID"]?></label><br />
-            <br />
-            <label id="pkcs7Type_label">Подписанный документ PKCS#7</label><br />
-            <textarea name="pkcs7"></textarea><br />
-            <br />
-            <label>Результат проверки</label><br />
-            <textarea name="verifyResult"></textarea><br />
-       </form>
+            <section class="panel">
+                <h1 class="panel__title">Сессия</h1>
+                <p class="panel__hint">Данные сертификата после успешного входа</p>
+                <div class="meta-box" style="margin-bottom: 0.85rem;">
+                    <div>
+                        <strong>ID ключа</strong>
+                        <label id="keyId"><?=$_SESSION["KEY_ID"]?></label>
+                    </div>
+                </div>
+                <pre class="user-info" id="userInfo"><?
+                    $userInfoPretty = $_SESSION["USER_INFO"];
+                    $userInfoDecoded = json_decode($userInfoPretty);
+                    if ($userInfoDecoded !== null) {
+                        $userInfoPretty = json_encode($userInfoDecoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                    }
+                    echo htmlspecialchars($userInfoPretty, ENT_QUOTES, 'UTF-8');
+                ?></pre>
+            </section>
+
+            <section class="panel">
+                <h2 class="panel__title">Подписание</h2>
+                <p class="panel__hint">Выберите формат PKCS#7 и подпишите текст или файл</p>
+
+                <form name="testform" class="stack" onsubmit="return false;">
+                    <div id="message" class="status status--message"></div>
+
+                    <div class="field">
+                        <span class="field-label">Тип подписанного документа</span>
+                        <div class="choice-list">
+                            <label class="choice" for="attached">
+                                <input type="radio" id="attached" name="pkcs7Type" value="attached" onchange="pkcs7Type_changed()" checked="checked">
+                                <span class="choice__title">PKCS#7 / Attached</span>
+                                <span class="choice__meta">с вложением</span>
+                            </label>
+                            <label class="choice" for="detached">
+                                <input type="radio" id="detached" name="pkcs7Type" value="detached" onchange="pkcs7Type_changed()">
+                                <span class="choice__title">PKCS#7 / Detached</span>
+                                <span class="choice__meta">без вложения</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <label class="field">
+                        <span>Текст для подписи</span>
+                        <textarea name="data" placeholder="Введите текст документа…"></textarea>
+                    </label>
+                    <div class="row">
+                        <button onclick="sign()" type="button" id="signButton" class="btn">Подписать текст</button>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <label class="field">
+                        <span>Файл для подписи</span>
+                        <input type="file" id="fileInput" accept="*/*">
+                    </label>
+                    <label class="field">
+                        <span>Содержимое файла (Base64)</span>
+                        <textarea name="fileData64" class="tall" placeholder="Заполняется автоматически после выбора файла…"></textarea>
+                    </label>
+                    <div class="row">
+                        <button onclick="signFile()" type="button" id="signFileButton" class="btn">Подписать файл</button>
+                    </div>
+
+                    <div id="progress" class="status status--progress"></div>
+
+                    <div class="divider"></div>
+
+                    <label class="field">
+                        <span id="pkcs7Type_label">Подписанный документ PKCS#7</span>
+                        <textarea name="pkcs7" class="tall"></textarea>
+                    </label>
+
+                    <label class="field">
+                        <span>Результат проверки</span>
+                        <textarea name="verifyResult" class="tall"></textarea>
+                    </label>
+                </form>
+            </section>
+
+            <p class="footer-note"><a href="index.php">Выйти</a></p>
+        </main>
 
         <script language="javascript">
 

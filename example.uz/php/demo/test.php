@@ -7,32 +7,68 @@ unset($_SESSION["USER_INFO"]);
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="ru">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <title></title>
-        <script src="e-imzo.js" type="text/javascript"></script> 
-        <script src="e-imzo-client.js?v=1.2" type="text/javascript"></script> 
-        <script src="micro-ajax.js" type="text/javascript"></script> 
-        <script src="e-imzo-init.js" type="text/javascript"></script> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>E-IMZO Demo — Выбор ключа</title>
+        <link rel="stylesheet" href="demo.css">
+        <script src="e-imzo.js" type="text/javascript"></script>
+        <script src="e-imzo-client.js?v=1.2" type="text/javascript"></script>
+        <script src="micro-ajax.js" type="text/javascript"></script>
+        <script src="e-imzo-init.js" type="text/javascript"></script>
     </head>
     <body>
-        <form name="testform">
-            <label id="message" style="color: red;"></label>
-            <p>Выберите тип ключа: (работает только с тестовыми ключами)</p>
-            <input type="radio" id="pfx" name="keyType" value="pfx" onchange="keyType_changed()" checked="checked">
-            <label for="pfx">PFX</label> - <select name="key" onchange="cbChanged(this)"></select><br>
-            <input type="radio" id="idcard" name="keyType" value="idcard" onchange="keyType_changed()">
-            <label for="idcard">EIMZO-Token или ID-card</label> - <label id="plugged_idcard">не подключена</label><br>
-            <input type="radio" id="baikey" name="keyType" value="baikey" onchange="keyType_changed()">
-            <label for="baikey">BAIK-Token</label> - <label id="plugged_baikey">не подключена</label><br>
-            <input type="radio" id="ckc" name="keyType" value="ckc" onchange="keyType_changed()">
-            <label for="ckc">CryptKeyContainer - для всех совместимых токенов - <label id="plugged_ckc">не подключена</label></label><br>
-            <br>
+        <main class="page">
+            <header class="brand">
+                <div class="brand__mark">E-<span>IMZO</span></div>
+                <p class="brand__tag">Вход с выбором типа ключа (только тестовые ключи)</p>
+            </header>
 
-            <button onclick="signin()" type="button" id="signButton">Вход</button><br>
-            <label id="progress" style="color: green;"></label>
-       </form>
+            <section class="panel">
+                <h1 class="panel__title">Тип ключа</h1>
+                <p class="panel__hint">Выберите носитель и нажмите «Вход»</p>
+
+                <form name="testform" onsubmit="return false;">
+                    <div id="message" class="status status--message"></div>
+
+                    <div class="choice-list">
+                        <label class="choice" for="pfx">
+                            <input type="radio" id="pfx" name="keyType" value="pfx" onchange="keyType_changed()" checked="checked">
+                            <span class="choice__title">PFX</span>
+                            <span class="choice__meta">файл сертификата</span>
+                            <select name="key" class="choice-select" onchange="cbChanged(this)"></select>
+                        </label>
+
+                        <label class="choice" for="idcard">
+                            <input type="radio" id="idcard" name="keyType" value="idcard" onchange="keyType_changed()">
+                            <span class="choice__title">EIMZO-Token / ID-card</span>
+                            <span class="choice__meta" id="plugged_idcard">не подключена</span>
+                        </label>
+
+                        <label class="choice" for="baikey">
+                            <input type="radio" id="baikey" name="keyType" value="baikey" onchange="keyType_changed()">
+                            <span class="choice__title">BAIK-Token</span>
+                            <span class="choice__meta" id="plugged_baikey">не подключена</span>
+                        </label>
+
+                        <label class="choice" for="ckc">
+                            <input type="radio" id="ckc" name="keyType" value="ckc" onchange="keyType_changed()">
+                            <span class="choice__title">CryptKeyContainer</span>
+                            <span class="choice__meta" id="plugged_ckc">не подключена</span>
+                        </label>
+                    </div>
+
+                    <div class="row" style="margin-top: 1.1rem;">
+                        <button onclick="signin()" type="button" id="signButton" class="btn">Вход</button>
+                    </div>
+
+                    <div id="progress" class="status status--progress"></div>
+                </form>
+            </section>
+
+            <p class="footer-note"><a href="index.php">Обычный вход</a></p>
+        </main>
 
         <script language="javascript">
             
@@ -72,15 +108,14 @@ unset($_SESSION["USER_INFO"]);
                     uiFillCombo(items);
                     uiLoaded();
                     uiComboSelect(firstId);
-                },function(e, r){
-                    if(e){
-                        uiShowMessage(errorCAPIWS + " : " + e);
-                    } else {
-                        console.log(r);
-                    }
-                });
+                },uiHandleError);
+                if(!EIMZOClient.NEW_API3){
+                    alert("E-IMZO version should be 4.86 or newer");
+                }
                 EIMZOClient.idCardIsPLuggedIn(function(yes){
-                    document.getElementById('plugged_idcard').innerHTML = yes ? 'подключена': 'не подключена';
+                    var el = document.getElementById('plugged_idcard');
+                    el.innerHTML = yes ? 'подключена': 'не подключена';
+                    el.className = 'choice__meta' + (yes ? ' is-on' : '');
                 },function(e, r){
                     if(e){
                         uiShowMessage(errorCAPIWS + " : " + e);
@@ -89,7 +124,9 @@ unset($_SESSION["USER_INFO"]);
                     }
                 })
                 EIMZOClient.isBAIKTokenPLuggedIn(function(yes){
-                    document.getElementById('plugged_baikey').innerHTML = yes ? 'подключена': 'не подключена';
+                    var el = document.getElementById('plugged_baikey');
+                    el.innerHTML = yes ? 'подключена': 'не подключена';
+                    el.className = 'choice__meta' + (yes ? ' is-on' : '');
                 },function(e, r){
                     if(e){
                         uiShowMessage(errorCAPIWS + " : " + e);
@@ -98,7 +135,9 @@ unset($_SESSION["USER_INFO"]);
                     }
                 })
                 EIMZOClient.isCKCPLuggedIn(function(yes){
-                    document.getElementById('plugged_ckc').innerHTML = yes ? 'подключена': 'не подключена';
+                    var el = document.getElementById('plugged_ckc');
+                    el.innerHTML = yes ? 'подключена': 'не подключена';
+                    el.className = 'choice__meta' + (yes ? ' is-on' : '');
                 },function(e, r){
                     if(e){
                         uiShowMessage(errorCAPIWS + " : " + e);
@@ -115,7 +154,7 @@ unset($_SESSION["USER_INFO"]);
                 }
             }
             
-            var cbChanged = function(c){
+            var cbChanged = function(c){                
                 if(document.getElementById('keyId')) {
                     document.getElementById('keyId').innerHTML = '';
                 }
