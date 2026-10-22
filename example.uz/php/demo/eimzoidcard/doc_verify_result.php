@@ -1,4 +1,4 @@
-<?
+<?php
 
 include("config.php");
 
@@ -30,10 +30,11 @@ $url = $verify_url;
 curl_setopt($ch,CURLOPT_URL,$url);
 curl_setopt($ch,CURLOPT_POST, 1);                //0 for a get request
 curl_setopt($ch,CURLOPT_HTTPHEADER, $headers);
+$documentId = $_POST['documentId'] ?? '';
 if($is_base64){
-  curl_setopt($ch,CURLOPT_POSTFIELDS,'documentId='.urlencode($_POST['documentId']).'&document='.urlencode($document));
+  curl_setopt($ch,CURLOPT_POSTFIELDS,'documentId='.urlencode($documentId).'&document='.urlencode($document));
 } else {
-  curl_setopt($ch,CURLOPT_POSTFIELDS,'documentId='.urlencode($_POST['documentId']).'&document='.urlencode(base64_encode($document)));
+  curl_setopt($ch,CURLOPT_POSTFIELDS,'documentId='.urlencode($documentId).'&document='.urlencode(base64_encode($document)));
 }
 curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch,CURLOPT_CONNECTTIMEOUT ,3);
@@ -60,11 +61,11 @@ curl_close ($ch);
 </head>
 
     <body>
-<?
-if($obj->{"status"} != 1) {
+<?php
+if(!is_object($obj) || $obj->{"status"} != 1) {
 ?><div class="alert alert-danger" role="alert">
-  <?=$obj->{"message"}?>
-</div><?
+  <?=is_object($obj) ? $obj->{"message"} : "Invalid response"?>
+</div><?php
 } else {
 $si = $obj->{"subjectCertificateInfo"};
 $sn = $si->{"subjectName"};
@@ -79,31 +80,31 @@ $vi = $obj->{"verificationInfo"};
     <div class="col-sm">Certificate Validity</div>
     <div class="col-sm"><?=$si->{"validFrom"}?> - <?=$si->{"validTo"}?></div>
   </div>
-<?
+<?php
 foreach($sn as $key => $value){
 ?>
   <div class="row">
     <div class="col-sm"><?=$key?></div>
     <div class="col-sm"><?=$value?></div>
   </div>
-<?
+<?php
 }
 foreach($vi as $key => $value){
 ?>
   <div class="row">
     <div class="col-sm"><?=$key?></div>
-	<?
+	<?php
 	if($key=="policyIdentifiers"){
-	?><div class="col-sm"><?=implode(",",$value)?></div><?
+	?><div class="col-sm"><?=implode(",",$value)?></div><?php
 } else {
 ?>
     <div class="col-sm"><?=$value?></div>
-<? } ?>
+<?php } ?>
   </div>
-<?
+<?php
 }?>
 </div>
-<?
+<?php
 
 
 

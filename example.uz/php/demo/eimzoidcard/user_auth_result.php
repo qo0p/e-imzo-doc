@@ -1,4 +1,4 @@
-<?
+<?php
 
 include("config.php");
 
@@ -14,7 +14,7 @@ include("config.php");
 </head>
 
     <body>
-<?
+<?php
 
 
 $user_ip = empty($_SERVER['HTTP_X_REAL_IP']) ? $_SERVER['REMOTE_ADDR'] : $_SERVER['HTTP_X_REAL_IP'];
@@ -22,7 +22,7 @@ $host = $_SERVER['HTTP_HOST'];
 
 $headers = array('Host: '.$host, 'X-Real-IP: '.$user_ip);
 
-$documentId = $_GET['documentId'];
+$documentId = $_GET['documentId'] ?? '';
 
 if (!preg_match('/^[a-zA-Z0-9_-]+$/', $documentId)) {
     die('Invalid documentId');
@@ -40,10 +40,10 @@ $response = curl_exec($ch);
 $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 if($httpcode == 200) {
     $obj = json_decode($response);
-    if($obj->{"status"} != 1){
+    if(!is_object($obj) || $obj->{"status"} != 1){
       ?><div class="alert alert-danger" role="alert">
-      <?=$obj->{"message"}?>
-      </div><?
+      <?=is_object($obj) ? $obj->{"message"} : "Invalid response"?>
+      </div><?php
     } else {
       
       $si = $obj->{"subjectCertificateInfo"};
@@ -58,23 +58,23 @@ if($httpcode == 200) {
           <div class="col-sm">Certificate Validity</div>
           <div class="col-sm"><?=$si->{"validFrom"}?> - <?=$si->{"validTo"}?></div>
         </div>
-      <?
+      <?php
       foreach($sn as $key => $value){
       ?>
         <div class="row">
           <div class="col-sm"><?=$key?></div>
           <div class="col-sm"><?=$value?></div>
         </div>
-      <?
+      <?php
       }?>
       </div>
-      <?
+      <?php
 
     }
 } else {
     ?><div class="alert alert-danger" role="alert">
       <?=htmlspecialchars($response === false ? curl_error($ch) : $response, ENT_QUOTES, 'UTF-8')?>
-      </div><?
+      </div><?php
 }
 curl_close ($ch);
 

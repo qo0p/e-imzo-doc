@@ -66,9 +66,11 @@ server {
 
 Скачайте php с сайта https://windows.php.net/download/
 
-В инструкции применяется версия _PHP 8.3 (8.3.10) VS16 x64 Thread Safe (2024-Jul-30 18:09:04)_ (https://windows.php.net/downloads/releases/php-8.3.10-Win32-vs16-x64.zip)
+Нужна версия **PHP 8.3.36 или новее** (также подходят 8.2.35, 8.4.27, 8.5.12). Более старые 8.3.x уязвимы к PHP2Shell (CVE-2026-109618, CVE-2026-109619).
 
-Распакуйте содержимое `php-8.3.10-Win32-vs16-x64.zip` в `c:\nginx\php` (предварительно создав папку `php`)
+В инструкции применяется версия _PHP 8.3 (8.3.36) VS16 x64 Thread Safe_ (https://windows.php.net/downloads/releases/php-8.3.36-Win32-vs16-x64.zip)
+
+Распакуйте содержимое `php-8.3.36-Win32-vs16-x64.zip` в `c:\nginx\php` (предварительно создав папку `php`)
 
 Скопируйте файл `c:\nginx\php\php.ini-production` в `c:\nginx\php\php.ini`
 

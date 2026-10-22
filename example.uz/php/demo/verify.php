@@ -1,4 +1,4 @@
-<?
+<?php
 
 session_start();
 
@@ -9,8 +9,8 @@ $host = $_SERVER['HTTP_HOST'];
 
 $headers = array('Host: '.$host, 'X-Real-IP: '.$user_ip);
 
-$pkcs7wtst = $_POST['pkcs7wtst'];
-$data64 = isset($_POST['data64']) ? $_POST['data64'] : "";
+$pkcs7wtst = $_POST['pkcs7wtst'] ?? '';
+$data64 = $_POST['data64'] ?? "";
 
 if($data64 == ""){
     $verify_url = $verify_url . "/attached";

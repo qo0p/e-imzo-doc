@@ -1,4 +1,4 @@
-<?
+<?php
 
 session_start();
 
@@ -18,7 +18,7 @@ session_start();
     </head>
     <body>
 
-        <?
+        <?php
 
         if(!isset($_SESSION["USER_INFO"])){
             ?>
@@ -33,7 +33,7 @@ session_start();
                     <a class="btn" href="index.php">Войти</a>
                 </section>
             </main>
-            <?
+            <?php
             exit();
         }
 
@@ -51,10 +51,10 @@ session_start();
                 <div class="meta-box" style="margin-bottom: 0.85rem;">
                     <div>
                         <strong>ID ключа</strong>
-                        <label id="keyId"><?=$_SESSION["KEY_ID"]?></label>
+                        <label id="keyId"><?=$_SESSION["KEY_ID"] ?? ''?></label>
                     </div>
                 </div>
-                <pre class="user-info" id="userInfo"><?
+                <pre class="user-info" id="userInfo"><?php
                     $userInfoPretty = $_SESSION["USER_INFO"];
                     $userInfoDecoded = json_decode($userInfoPretty);
                     if ($userInfoDecoded !== null) {

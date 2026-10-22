@@ -1,4 +1,4 @@
-<?
+<?php
 
 session_start();
 
@@ -9,8 +9,8 @@ $host = $_SERVER['HTTP_HOST'];
 
 $headers = array('Host: '.$host, 'X-Real-IP: '.$user_ip);
 
-$pkcs7 = $_POST['pkcs7'];
-$keyId = $_POST['keyId'];
+$pkcs7 = $_POST['pkcs7'] ?? '';
+$keyId = $_POST['keyId'] ?? '';
 
 $ch = curl_init();
 $postvars = $pkcs7;
@@ -27,10 +27,10 @@ $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 header('Content-Type: application/json; charset=UTF-8');
 if($httpcode == 200) {
     $jr = json_decode($response);
-    if($jr->{"status"} != 1){
+    if(!is_object($jr) || $jr->{"status"} != 1){
         echo json_encode(array(
-            "status" => $jr->{"status"},
-            "message" => $jr->{"message"}
+            "status" => is_object($jr) ? $jr->{"status"} : 0,
+            "message" => is_object($jr) ? $jr->{"message"} : "Invalid response"
         ));
     } else {
         $_SESSION["USER_INFO"] = json_encode($jr->{"subjectCertificateInfo"});
