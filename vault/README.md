@@ -18,22 +18,34 @@
 
 1. `entrypoint.sh` запускает `vault server -dev`.
 2. `init.sh` записывает `api-keys.json` в `secret/eimzo/api-keys`, создаёт политику `eimzo-nginx` и токен `NGINX_VAULT_TOKEN`.
-3. Healthcheck становится `healthy`, после этого стартует proxy.
+3. Read-only токен записывается в volume `vault-token` для proxy.
+4. Healthcheck становится `healthy`, после этого стартует proxy.
 
-| Переменная | По умолчанию |
+## Токены — `vault.env`
+
+Токены лежат в `vault.env` в корне проекта (не в git). Шаблон — `vault.env.example`:
+
+```sh
+cp vault.env.example vault.env
+# задайте значения, например: openssl rand -hex 24
+```
+
+| Переменная | Назначение |
 |---|---|
-| `VAULT_ROOT_TOKEN` (`VAULT_DEV_ROOT_TOKEN_ID`) | `root` |
-| `NGINX_VAULT_TOKEN` | `nginx-read-token` |
+| `VAULT_DEV_ROOT_TOKEN_ID` | Root-токен, используется только внутри контейнера vault |
+| `NGINX_VAULT_TOKEN` | Read-only токен для proxy (политика `eimzo-nginx`) |
 
-Токены можно задать в `.env` рядом с `docker-compose.yml`.
+`vault.env` получает только контейнер vault. Read-only токен vault записывает в общий volume `vault-token` (`/run/vault-token/nginx-token`), proxy читает его оттуда — root-токен в proxy не попадает.
 
-UI/API: http://127.0.0.1:8200 (только localhost).
+## Доступ
+
+Порт Vault **не публикуется**. Vault находится в сети `secrets` (`internal`): к нему подключён только proxy, нет интернета и доступа с хоста. Администрирование — через `docker compose exec`.
 
 ## Добавить / изменить ключ
 
 ```sh
-docker compose exec -e VAULT_TOKEN=root vault \
-  vault kv patch secret/eimzo/api-keys example.uz=КЛЮЧ...
+docker compose exec vault sh -c \
+  'VAULT_TOKEN=$VAULT_DEV_ROOT_TOKEN_ID vault kv patch secret/eimzo/api-keys example.uz=КЛЮЧ...'
 docker compose restart proxy   # или подождать до 5 минут
 ```
 

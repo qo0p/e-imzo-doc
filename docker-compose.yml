@@ -5,13 +5,12 @@ services:
     restart: unless-stopped
     cap_add:
       - IPC_LOCK
-    environment:
-      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_ROOT_TOKEN:-root}
-      NGINX_VAULT_TOKEN: ${NGINX_VAULT_TOKEN:-nginx-read-token}
-    ports:
-      - "127.0.0.1:8200:8200"
+    env_file:
+      - vault.env
+    volumes:
+      - vault-token:/run/vault-token
     networks:
-      - eimzo-net
+      - secrets
 
   server:
     build: ./server
@@ -24,18 +23,17 @@ services:
       - ./server/logging.properties:/opt/e-imzo-server/config/logging.properties:ro
       - ./server/keys:/opt/e-imzo-server/keys
     networks:
-      - eimzo-net
+      - back  
 
   client:
     build: ./client
     container_name: e-imzo-client
     restart: unless-stopped
-    environment:
-      EIMZO_SERVER_URL: http://proxy:8080
+    network_mode: "service:proxy"
     volumes:
       - ./client:/var/www/html
-    networks:
-      - eimzo-net
+    depends_on:
+      - proxy
 
   proxy:
     build: ./proxy
@@ -43,21 +41,28 @@ services:
     restart: unless-stopped
     environment:
       VAULT_ADDR: http://vault:8200
-      VAULT_TOKEN: ${NGINX_VAULT_TOKEN:-nginx-read-token}
+      VAULT_TOKEN_FILE: /run/vault-token/nginx-token
       VAULT_SECRET_PATH: secret/data/eimzo/api-keys
       VAULT_REFRESH_INTERVAL: "300"
     ports:
-      - "8082:80"
+      - "8082:8082"
+    volumes:
+      - vault-token:/run/vault-token:ro
     networks:
-      - eimzo-net
+      - back
+      - secrets
     depends_on:
       vault:
         condition: service_healthy
       server:
         condition: service_started
-      client:
-        condition: service_started
 
 networks:
-  eimzo-net:
+  back:     
     driver: bridge
+  secrets:  
+    driver: bridge
+    internal: true
+
+volumes:
+  vault-token:

@@ -7,8 +7,12 @@ OUT=/etc/nginx/eimzo/api-keys.json
 VAULT_ADDR=${VAULT_ADDR:-http://vault:8200}
 VAULT_SECRET_PATH=${VAULT_SECRET_PATH:-secret/data/eimzo/api-keys}
 VAULT_REFRESH_INTERVAL=${VAULT_REFRESH_INTERVAL:-300}
+VAULT_TOKEN_FILE=${VAULT_TOKEN_FILE:-/run/vault-token/nginx-token}
 
 fetch_keys() {
+  # read-only token written by the vault container (shared volume)
+  [ -r "$VAULT_TOKEN_FILE" ] && VAULT_TOKEN=$(cat "$VAULT_TOKEN_FILE")
+  [ -n "$VAULT_TOKEN" ] || return 1
   resp=$(curl -sf -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/$VAULT_SECRET_PATH") || return 1
   echo "$resp" | jq -c '.data.data // {} | to_entries | map([.key, .value]) | add // []' > "$OUT.tmp" || return 1
   mv "$OUT.tmp" "$OUT"

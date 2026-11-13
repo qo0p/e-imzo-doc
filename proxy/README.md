@@ -4,17 +4,36 @@
 
 ## Маршруты
 
-Публичный сервер — `:80` (на хосте **`8082`**):
+Публичный сервер — `:8082` (на хосте **`8082`**):
 
 | Путь | Куда |
 |---|---|
-| `/` | `client:80` (PHP-сайт) |
+| `/` | `127.0.0.1:80` — Apache клиента (общая сеть) |
 | `/frontend/*` | `server:8080` (e-imzo-server) |
 | `/backend/*` | `404` — закрыто снаружи |
 | `/api-keys.json` | API-KEY из Vault |
 
-Внутренний сервер — `:8080` (не публикуется): `client` → `proxy:8080` → `server:8080`.
+Внутренний сервер — `127.0.0.1:8080` (не публикуется): client работает в сети proxy (`network_mode: service:proxy`), поэтому адрес по умолчанию из `client/config.php` (`http://127.0.0.1:8080`) попадает сюда → `server:8080`. Снаружи и из других контейнеров недоступен.
 `Host` и `X-Real-IP`, переданные PHP, пробрасываются в e-imzo-server.
+
+## Защита
+
+Только port `8082` опубликован. `server`, `client`, `vault` наружу не открыты.
+
+| Что | Как |
+|---|---|
+| Боты, curl, wget, Postman, Insomnia, Fiddler, python, сканеры… | По `User-Agent` → `444` (соединение закрывается без ответа). Исключение: `/frontend/mobile/upload` (мобильное приложение E-IMZO) |
+| `/api-keys.json` | Только `GET` от браузера: `Sec-Fetch-Site: same-origin`, `Sec-Fetch-Mode: cors`, `Sec-Fetch-Dest: empty`, `X-Requested-With: XMLHttpRequest`, иначе `444` |
+| Лимиты | `/api-keys.json` — 10 запросов/мин с IP, остальное — 20 запросов/сек, 30 соединений с IP |
+| Методы | Только `GET`, `POST`, `HEAD` |
+| `/backend/*`, `config.php`, `.*` | `404` снаружи |
+| Внутренний `:8080` | Слушает только `127.0.0.1` (client в той же сети) |
+
+Сети: client — в сети proxy (`service:proxy`), `back` (proxy ↔ server, с интернетом для VPN), `secrets` (proxy ↔ vault, `internal`, без интернета и без доступа с хоста).
+
+> **Ограничение.** Ключи всё равно попадают в браузер — иначе E-IMZO не сможет их установить. Пользователь сайта может увидеть их в DevTools браузера, а настойчивый человек может подделать заголовки, повторив шаги браузера. Защита отсекает ботов и простые запросы, но не делает ключи секретными. API-KEY E-IMZO привязан к домену, поэтому на чужом домене он не работает.
+>
+> `ping`/`telnet` на сам хост закрываются файрволом хоста, не nginx. Контейнеры не отвечают снаружи, кроме порта `8082`.
 
 ## API-KEY из Vault
 
@@ -29,7 +48,7 @@
 | Переменная | По умолчанию |
 |---|---|
 | `VAULT_ADDR` | `http://vault:8200` |
-| `VAULT_TOKEN` | `nginx-read-token` (только чтение) |
+| `VAULT_TOKEN_FILE` | `/run/vault-token/nginx-token` — read-only токен, его пишет vault в общий volume `vault-token` |
 | `VAULT_SECRET_PATH` | `secret/data/eimzo/api-keys` |
 | `VAULT_REFRESH_INTERVAL` | `300` |
 

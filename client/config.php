@@ -1,9 +1,8 @@
 <?php
 
-$eimzo_server = rtrim(getenv('EIMZO_SERVER_URL') ?: 'http://127.0.0.1:8080', '/');
+$auth_url="http://127.0.0.1:8080/backend/auth";
 
-$auth_url = $eimzo_server . "/backend/auth";
+$verify_url="http://127.0.0.1:8080/backend/pkcs7/verify";
 
-$verify_url = $eimzo_server . "/backend/pkcs7/verify";
 
 ?>

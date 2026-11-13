@@ -5,15 +5,16 @@
 ## Быстрый запуск (Docker Compose)
 
 ```sh
+cp vault.env.example vault.env   # задайте токены Vault
 docker compose up -d --build
 ```
 
-Сайт: http://localhost:8082 — наружу открыт только этот порт.
+Сайт: http://localhost:8082 — наружу открыт только этот порт. Защита proxy — [proxy/README.md](proxy/README.md#защита).
 
 | Сервис | Папка | Описание |
 |---|---|---|
 | `proxy` | [proxy/](proxy/README.md) | nginx: `/` → client, `/frontend/*` → server, `/backend/*` закрыт, `/api-keys.json` из Vault |
-| `client` | [client/](client/README.md) | Демо-сайт PHP 8.3 + Apache |
+| `client` | [client/](client/README.md) | Демо-сайт PHP 8.3 + Apache (исходный код без изменений, сеть proxy) |
 | `server` | [server/](server/README.md) | e-imzo-server (JRE 8) |
 | `vault` | [vault/](vault/README.md) | HashiCorp Vault с API-KEY доменов |
 
@@ -22,7 +23,7 @@ flowchart LR
   browser[Браузер] -->|:8082| proxy
   proxy -->|/| client
   proxy -->|/frontend| server
-  client -->|proxy:8080 /backend| proxy
+  client -->|127.0.0.1:8080 /backend| proxy
   proxy -->|API-KEY| vault
 ```
 
