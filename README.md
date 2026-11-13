@@ -14,7 +14,7 @@ docker compose up -d --build
 | Сервис | Папка | Описание |
 |---|---|---|
 | `proxy` | [proxy/](proxy/README.md) | nginx: `/` → client, `/frontend/*` → server, `/backend/*` закрыт, `/api-keys.json` из Vault |
-| `client` | [client/](client/README.md) | Демо-сайт PHP 8.3 + Apache (исходный код без изменений, сеть proxy) |
+| `client` | [client/](client/README.md) | Демо-сайт PHP 8.3 + Apache (сеть proxy, `/backend` → `server:8080`, API-KEY доменов из Vault) |
 | `server` | [server/](server/README.md) | e-imzo-server (JRE 8) |
 | `vault` | [vault/](vault/README.md) | HashiCorp Vault с API-KEY доменов |
 
@@ -23,7 +23,7 @@ flowchart LR
   browser[Браузер] -->|:8082| proxy
   proxy -->|/| client
   proxy -->|/frontend| server
-  client -->|127.0.0.1:8080 /backend| proxy
+  client -->|server:8080 /backend| server
   proxy -->|API-KEY| vault
 ```
 

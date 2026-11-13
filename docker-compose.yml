@@ -10,7 +10,7 @@ services:
     volumes:
       - vault-token:/run/vault-token
     networks:
-      - secrets
+      - eimzo_lan
 
   server:
     build: ./server
@@ -23,7 +23,7 @@ services:
       - ./server/logging.properties:/opt/e-imzo-server/config/logging.properties:ro
       - ./server/keys:/opt/e-imzo-server/keys
     networks:
-      - back  
+      - eimzo_lan
 
   client:
     build: ./client
@@ -49,8 +49,7 @@ services:
     volumes:
       - vault-token:/run/vault-token:ro
     networks:
-      - back
-      - secrets
+      - eimzo_lan
     depends_on:
       vault:
         condition: service_healthy
@@ -58,11 +57,8 @@ services:
         condition: service_started
 
 networks:
-  back:     
+  eimzo_lan:
     driver: bridge
-  secrets:  
-    driver: bridge
-    internal: true
 
 volumes:
   vault-token:

@@ -19,9 +19,9 @@ Docker-образ для `e-imzo-server` (JRE 8, `amazoncorretto:8-alpine3.22-jr
 ## В docker compose
 
 - Имя сервиса: `server` (контейнер `e-imzo-server`).
-- Порты наружу **не публикуются**. Доступ только через [proxy](../proxy/README.md):
-  - браузер → `proxy:80/frontend/*` → `server:8080`
-  - PHP-клиент → `proxy:8080` → `server:8080` (методы `/backend/*`)
+- Порты наружу **не публикуются**. Сеть `eimzo_lan`:
+  - браузер → [proxy](../proxy/README.md) `:8082/frontend/*` → `server:8080`
+  - PHP-клиент → `server:8080` напрямую (методы `/backend/*`, `client/config.php`)
 - `config.properties`, `logging.properties` и `keys/` подключены как volume — после изменения достаточно:
 
 ```sh

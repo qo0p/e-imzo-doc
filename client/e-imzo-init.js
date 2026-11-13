@@ -8,14 +8,52 @@ var errorUpdateApp = 'ВНИМАНИЕ !!! Установите новую ве�
 var errorWrongPassword = 'Пароль неверный.';
 
 
+// Local API keys. Keys for other domains (test.e-imzo.uz, test.e-imzo.local, ...)
+// are stored in HashiCorp Vault and served by the proxy at /api-keys.json
+// as a flat array: [domain, key, domain, key, ...]
+var EIMZO_DEFAULT_API_KEYS = [
+    'null', 'E0A205EC4E7B78BBB56AFF83A733A1BB9FD39D562E67978CC5E7D73B0951DB1954595A20672A63332535E13CC6EC1E1FC8857BB09E0855D7E76E411B6FA16E9D',
+    'localhost', '96D0C1491615C82B9A54D9989779DF825B690748224C2B04F500F370D51827CE2644D8D4A82C18184D73AB8530BB8ED537269603F61DB0D03D2104ABF789970B',
+    '127.0.0.1', 'A7BCFA5D490B351BE0754130DF03A068F855DB4333D43921125B9CF2670EF6A40370C646B90401955E1F7BC9CDBF59CE0B2C5467D820BE189C845D0B79CFC96F'
+];
+
+var loadApiKeys = function (callback) {
+    var done = false;
+    var finish = function (keys) {
+        if (done) return;
+        done = true;
+        callback(keys);
+    };
+    try {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api-keys.json?_uc=' + Date.now(), true);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.timeout = 5000;
+        xhr.onload = function () {
+            var keys = [];
+            if (xhr.status === 200) {
+                try {
+                    var parsed = JSON.parse(xhr.responseText);
+                    if (Array.isArray(parsed) && parsed.length % 2 === 0) keys = parsed;
+                } catch (e) { }
+            }
+            finish(keys);
+        };
+        xhr.onerror = xhr.ontimeout = function () { finish([]); };
+        xhr.send();
+    } catch (e) {
+        finish([]);
+    }
+};
+
 var AppLoad = function () {
-    EIMZOClient.API_KEYS = [
-        'null', 'E0A205EC4E7B78BBB56AFF83A733A1BB9FD39D562E67978CC5E7D73B0951DB1954595A20672A63332535E13CC6EC1E1FC8857BB09E0855D7E76E411B6FA16E9D',
-        'localhost', '96D0C1491615C82B9A54D9989779DF825B690748224C2B04F500F370D51827CE2644D8D4A82C18184D73AB8530BB8ED537269603F61DB0D03D2104ABF789970B',
-        '127.0.0.1', 'A7BCFA5D490B351BE0754130DF03A068F855DB4333D43921125B9CF2670EF6A40370C646B90401955E1F7BC9CDBF59CE0B2C5467D820BE189C845D0B79CFC96F',
-        'test.e-imzo.uz', 'DE783306B4717AFE4AE1B185E1D967C265AA397A35D8955C7D7E38A36F02798AA62FBABE2ABA15C888FE2F057474F35A5FC783D23005E4347A3E34D6C1DDBAE5',
-        'test.e-imzo.local', 'D56ABC7F43A23466D9ADB1A2335E7430FCE0F46B0EC99B578D554333245FC071357AE9E7E2F75F96B73AEEE7E0D61AE84E414F5CD795D8B6484E5645CAF958FC'
-    ];
+    loadApiKeys(function (vaultKeys) {
+        EIMZOClient.API_KEYS = EIMZO_DEFAULT_API_KEYS.concat(vaultKeys);
+        AppLoadWithKeys();
+    });
+};
+
+var AppLoadWithKeys = function () {
     uiLoading();
     EIMZOClient.checkVersion(function (major, minor) {
         var newVersion = EIMZO_MAJOR * 100 + EIMZO_MINOR;

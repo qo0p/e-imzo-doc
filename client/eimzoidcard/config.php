@@ -1,7 +1,8 @@
 <?php
 
-$auth_url="http://127.0.0.1:8080/backend/mobile/authenticate/";
+// e-imzo-server (docker compose service "server", reachable via the "back" network)
+$auth_url="http://server:8080/backend/mobile/authenticate/";
 
-$verify_url='http://127.0.0.1:8080/backend/mobile/verify';
+$verify_url='http://server:8080/backend/mobile/verify';
 
 ?>

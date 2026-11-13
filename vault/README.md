@@ -1,6 +1,6 @@
 # vault — HashiCorp Vault
 
-Хранит API-KEY E-IMZO для доменов (кроме локальных `null`, `localhost`, `127.0.0.1`, которые прописаны в `client/e-imzo-init.js`).
+Хранит API-KEY E-IMZO для доменов (`test.e-imzo.uz`, `test.e-imzo.local`, …). Клиент получает их через proxy (`/api-keys.json`). В `client/e-imzo-init.js` остаются только локальные `null`, `localhost`, `127.0.0.1`.
 
 ## Файлы
 
@@ -39,7 +39,7 @@ cp vault.env.example vault.env
 
 ## Доступ
 
-Порт Vault **не публикуется**. Vault находится в сети `secrets` (`internal`): к нему подключён только proxy, нет интернета и доступа с хоста. Администрирование — через `docker compose exec`.
+Порт Vault **не публикуется** — с хоста недоступен. Vault находится в общей сети `eimzo_lan`; читает ключи только proxy (read-only токен). Администрирование — через `docker compose exec`.
 
 ## Добавить / изменить ключ
 
