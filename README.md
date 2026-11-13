@@ -5,7 +5,6 @@
 ## Быстрый запуск (Docker Compose)
 
 ```sh
-cp vault.env.example vault.env   # задайте токены Vault
 docker compose up -d --build
 ```
 

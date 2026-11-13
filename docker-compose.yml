@@ -5,8 +5,9 @@ services:
     restart: unless-stopped
     cap_add:
       - IPC_LOCK
-    env_file:
-      - vault.env
+    environment:
+      # Read-only token for the proxy (policy eimzo-nginx), written to volume vault-token.
+      NGINX_VAULT_TOKEN_ID: 404b847a8deb7e614be80e406c6387900fa3ef591b54aa8a
     volumes:
       - vault-token:/run/vault-token
     healthcheck:
