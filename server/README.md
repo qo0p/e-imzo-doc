@@ -30,8 +30,9 @@ docker compose restart server
 
 ## Логи
 
-- Формат задаётся в `logging.properties` (`java.util.logging.SimpleFormatter.format`).
-- `entrypoint.sh` пишет вывод сервера в `docker logs` и в файл за день: `server/logs/ddMMyyyy.log` (например `13112026.log`). Новый файл — после полуночи по `TZ` (`Asia/Tashkent` в `docker-compose.yml`).
+- `logging.properties`: handler `uz.eimzo.logging.DailyFileHandler` (вместо `ConsoleHandler`), формат — `java.util.logging.SimpleFormatter.format`.
+- Пишет только в файл за день `server/logs/ddMMyyyy.log` (например `13112026.log`), новый файл — после полуночи по `TZ` (`Asia/Tashkent` в `docker-compose.yml`). В `docker logs` остаётся только то, что сервер печатает в stdout (баннер, SLF4J).
+- Исходник handler-а: `logging-handler/src/`. `Dockerfile` компилирует его на этапе сборки и кладёт jar в `/usr/java/packages/lib/ext/` (classpath сервера не меняется).
 - Папка `server/logs/` подключена как volume; `*.log` не попадают в git.
 
 ```sh
