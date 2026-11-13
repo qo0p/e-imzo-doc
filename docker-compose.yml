@@ -9,6 +9,12 @@ services:
       - vault.env
     volumes:
       - vault-token:/run/vault-token
+    healthcheck:
+      test: [ "CMD-SHELL", "test -f /tmp/vault-init-done && vault status >/dev/null || exit 1" ]
+      interval: 5s
+      timeout: 3s
+      start_period: 10s
+      retries: 10
     networks:
       - eimzo_lan
 
@@ -25,7 +31,7 @@ services:
       - ./server/keys:/opt/e-imzo-server/keys
       - ./server/logs:/opt/e-imzo-server/logs
     healthcheck:
-      test: ["CMD-SHELL", "nc -z -w 3 127.0.0.1 8080 || exit 1"]
+      test: [ "CMD-SHELL", "nc -z -w 3 127.0.0.1 8080 || exit 1" ]
       interval: 15s
       timeout: 5s
       start_period: 20s
@@ -41,13 +47,14 @@ services:
     volumes:
       - ./client:/var/www/html
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1/demo.css || exit 1"]
+      test: [ "CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1/demo.css || exit 1" ]
       interval: 15s
       timeout: 5s
       start_period: 10s
       retries: 5
     depends_on:
-      - proxy
+      proxy:
+        condition: service_healthy
 
   proxy:
     build: ./proxy
@@ -63,7 +70,7 @@ services:
     volumes:
       - vault-token:/run/vault-token:ro
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8082/healthz && test -s /etc/nginx/eimzo/api-keys.json || exit 1"]
+      test: [ "CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8082/healthz && test -s /etc/nginx/eimzo/api-keys.json || exit 1" ]
       interval: 15s
       timeout: 5s
       start_period: 10s

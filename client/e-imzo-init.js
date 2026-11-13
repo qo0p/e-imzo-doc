@@ -48,7 +48,16 @@ var loadApiKeys = function (callback) {
 
 var AppLoad = function () {
     loadApiKeys(function (vaultKeys) {
-        EIMZOClient.API_KEYS = EIMZO_DEFAULT_API_KEYS.concat(vaultKeys);
+        // E-IMZO rejects the whole list if any key is invalid,
+        // so install only 'null' + the key(s) for the current page's domain.
+        var all = EIMZO_DEFAULT_API_KEYS.concat(vaultKeys);
+        var host = String(window.location.hostname || 'null');
+        var own = [], found = false;
+        for (var i = 0; i + 1 < all.length; i += 2) {
+            if (all[i] === host) found = true;
+            if (all[i] === host || all[i] === 'null') own.push(all[i], all[i + 1]);
+        }
+        EIMZOClient.API_KEYS = found ? own : all;
         AppLoadWithKeys();
     });
 };
