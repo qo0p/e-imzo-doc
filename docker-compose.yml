@@ -47,7 +47,7 @@ services:
     volumes:
       - ./client:/var/www/html
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1/demo.css || exit 1" ]
+      test: [ "CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1/styles/demo.css || exit 1" ]
       interval: 15s
       timeout: 5s
       start_period: 10s
