@@ -1,6 +1,7 @@
 FROM hashicorp/vault:1.18
 
 COPY api-keys.json nginx-policy.hcl init.sh entrypoint.sh /vault-init/
+
 RUN chmod +x /vault-init/*.sh
 
 ENV VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200 \
