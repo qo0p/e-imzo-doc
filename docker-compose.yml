@@ -24,6 +24,12 @@ services:
       - ./server/logging.properties:/opt/e-imzo-server/config/logging.properties:ro
       - ./server/keys:/opt/e-imzo-server/keys
       - ./server/logs:/opt/e-imzo-server/logs
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z -w 3 127.0.0.1 8080 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
     networks:
       - eimzo_lan
 
@@ -34,6 +40,12 @@ services:
     network_mode: "service:proxy"
     volumes:
       - ./client:/var/www/html
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1/demo.css || exit 1"]
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
     depends_on:
       - proxy
 
@@ -50,13 +62,19 @@ services:
       - "8082:8082"
     volumes:
       - vault-token:/run/vault-token:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8082/healthz && test -s /etc/nginx/eimzo/api-keys.json || exit 1"]
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
     networks:
       - eimzo_lan
     depends_on:
       vault:
         condition: service_healthy
       server:
-        condition: service_started
+        condition: service_healthy
 
 networks:
   eimzo_lan:

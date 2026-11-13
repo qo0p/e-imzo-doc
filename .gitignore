@@ -1,3 +1,4 @@
 .DS_Store
 server/logs/*
 !server/logs/.gitkeep
+server/keys/*.key
