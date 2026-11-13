@@ -3,7 +3,6 @@
 session_start();
 
 unset($_SESSION["USER_INFO"]);
-
 ?>
 
 <!DOCTYPE html>
@@ -12,11 +11,11 @@ unset($_SESSION["USER_INFO"]);
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>E-IMZO Demo — Выбор ключа</title>
-        <link rel="stylesheet" href="demo.css">
-        <script src="e-imzo.js" type="text/javascript"></script>
-        <script src="e-imzo-client.js?v=1.2" type="text/javascript"></script>
-        <script src="micro-ajax.js" type="text/javascript"></script>
-        <script src="e-imzo-init.js" type="text/javascript"></script>
+        <link rel="stylesheet" href="styles/demo.css">
+        <script src="scripts/e-imzo.js" type="text/javascript"></script>
+        <script src="scripts/e-imzo-client.js?v=1.2" type="text/javascript"></script>
+        <script src="scripts/micro-ajax.js" type="text/javascript"></script>
+        <script src="scripts/e-imzo-init.js" type="text/javascript"></script>
     </head>
     <body>
         <main class="page">

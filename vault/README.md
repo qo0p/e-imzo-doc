@@ -1,6 +1,6 @@
 # vault — HashiCorp Vault
 
-Хранит API-KEY E-IMZO для доменов (`test.e-imzo.uz`, `test.e-imzo.local`, …). Клиент получает их через proxy (`/api-keys.json`). В `client/e-imzo-init.js` остаются только локальные `null`, `localhost`, `127.0.0.1`.
+Хранит API-KEY E-IMZO для доменов (`test.e-imzo.uz`, `test.e-imzo.local`, …). Клиент получает их через proxy (`/api-keys.json`). В `client/scripts/e-imzo-init.js` остаются только локальные `null`, `localhost`, `127.0.0.1`.
 
 ## Файлы
 

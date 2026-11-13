@@ -12,8 +12,8 @@
 | `verify.php` | Backend: проверка подписи → `/backend/pkcs7/verify` |
 | `test.php` | Тестовая страница |
 | `config.php` | URL методов e-imzo-server (`http://server:8080`) |
-| `e-imzo.js`, `e-imzo-client.js` | Библиотека E-IMZO (CAPIWS) |
-| `e-imzo-init.js` | Инициализация; локальные API-KEY + ключи доменов из Vault (`/api-keys.json`) |
+| `scripts/e-imzo.js`, `scripts/e-imzo-client.js` | Библиотека E-IMZO (CAPIWS) |
+| `scripts/e-imzo-init.js` | Инициализация; локальные API-KEY + ключи доменов из Vault (`/api-keys.json`) |
 | `eimzoidcard/` | Вход/подпись через E-IMZO ID-карту (мобильное приложение) |
 
 ## Исходный код
@@ -21,7 +21,7 @@
 Отличия от исходного демо-кода:
 
 - `config.php`, `eimzoidcard/config.php` — адрес `http://server:8080` (сервис `server` в docker compose).
-- `e-imzo-init.js` — в коде только локальные ключи (`null`, `localhost`, `127.0.0.1`); ключи `test.e-imzo.uz`, `test.e-imzo.local` и др. загружаются из Vault через `/api-keys.json`.
+- `scripts/e-imzo-init.js` — в коде только локальные ключи (`null`, `localhost`, `127.0.0.1`); ключи `test.e-imzo.uz`, `test.e-imzo.local` и др. загружаются из Vault через `/api-keys.json`.
 
 ## Docker
 

@@ -1,0 +1,216 @@
+body {
+    font-family: "Open Sans", sans-serif;
+}
+
+.qr-modal {
+    position: fixed;
+    top: 0px;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    margin: auto;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    display: none;
+    z-index: 101;
+}
+
+.qr-modal.show-modal {
+    display: flex;
+}
+
+.qr-modal .modal-frame {
+    background-color: #fff;
+    overflow: hidden;
+    width: 675px;
+    margin: auto;
+}
+
+.qr-modal-overlay {
+    background: linear-gradient(0deg, rgba(51, 51, 51, 0.4), rgba(51, 51, 51, 0.4));
+    filter: blur(10px);
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    z-index: 100;
+}
+
+.qr-modal-overlay.show-modal {
+    display: none;
+}
+
+.qr-modal .header {
+    padding: 20px;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.qr-modal .header .title {
+    font-weight: 600;
+    font-size: 26px;
+    line-height: 39px;
+    color: rgba(0, 0, 0, 0.8);
+    text-align: center;
+    width: 100%;
+    padding-right: 20px;
+}
+
+.qr-modal .header #close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 99;
+    cursor: pointer;
+}
+
+.qr-modal .header #close-btn img {
+    height: 26px;
+    width: 26px;
+}
+
+.qr-modal .body {
+    padding: 0 15px;
+    margin-bottom: 50px !important;
+}
+
+.qr-modal .body .qr-img {
+    min-height: 350px;
+}
+
+.qr-modal .body .qr-img img {
+    width: 100%;
+}
+
+.qr-modal .body .qr-info .link:last-child {
+    margin-bottom: 15px !important;
+}
+
+.qr-modal .body .qr-info .link a {
+    font-size: 16px;
+    line-height: 24px;
+    color: #70abcf;
+}
+
+.qr-modal .body .qr-info {
+    display: flex;
+    flex-direction: column;
+    align-content: space-between;
+    font-size: 16px;
+    padding-left: 0px;
+}
+
+.qr-modal .body .qr-info .link span {
+    font-size: 16px;
+    line-height: 24px;
+    text-transform: lowercase;
+    color: #333;
+}
+
+.qr-modal .body .qr-info .title {
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 34px;
+    text-transform: uppercase;
+    color: #333;
+}
+
+.qr-modal .body .qr-info .qr-code-text {
+    background: #f6f6f6;
+    padding: 18px;
+    margin-bottom: 35px;
+    max-width: 90%;
+    overflow-wrap: break-word;
+    padding: 18px 30px 18px 18px;
+    font-size: 16px;
+    line-height: 25px;
+    color: #888;
+    overflow: hidden;
+    font-family: monospace, monospace;
+}
+
+.downloads-btn {
+    font-size: 14px;
+    line-height: 21px;
+    color: rgba(0, 0, 0, 0.5);
+    padding: 10px 18px;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+.footer {
+    background: linear-gradient(0deg, #e8e8e8, #e8e8e8);
+    text-align: center;
+    position: relative;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    min-height: 20px;
+}
+
+.footer .footer-title {
+    color: rgba(51, 51, 51, 0.5);
+    font-size: 12px;
+    z-index: 999;
+    position: relative;
+}
+
+.progress_bar {
+    background: linear-gradient(0deg, #91c0dd, #91c0dd);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 70%;
+}
+
+.qr-modal .qr-img {
+    box-shadow: 0px 0px 4px rgba(170, 170, 170, 0.5);
+    height: 100%;
+    padding: 15px;
+    padding-bottom: 30px;
+}
+
+.qr-modal .qr-side {
+    padding-right: 0px;
+    padding-top: 15px;
+}
+
+.qr-modal .qr-heading {
+    font-weight: 700;
+    font-size: 26px;
+}
+
+.qr-modal .instruction-col {
+    padding-left: 0px;
+    padding-top: 5px;
+}
+
+#download-instruction {
+    background-color: white;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    padding: 10px 18px;
+    width: 80%;
+    font-family: sans-serif;
+    font-size: 14px;
+    line-height: 21px;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.card-fixed {
+    width: 18rem;
+}
+
+.hash-digit {
+    color: #333;
+}
+
+.hash-alpha {
+    color: #00c68e;
+}

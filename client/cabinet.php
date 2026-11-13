@@ -1,8 +1,6 @@
 <?php
 
-session_start();
-
-?>
+session_start(); ?>
 
 <!DOCTYPE html>
 <html lang="ru">
@@ -10,18 +8,15 @@ session_start();
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>E-IMZO Demo — Кабинет</title>
-        <link rel="stylesheet" href="demo.css">
-        <script src="e-imzo.js" type="text/javascript"></script>
-        <script src="e-imzo-client.js" type="text/javascript"></script>
-        <script src="micro-ajax.js" type="text/javascript"></script>
-        <script src="e-imzo-init.js" type="text/javascript"></script>
+        <link rel="stylesheet" href="styles/demo.css">
+        <script src="scripts/e-imzo.js" type="text/javascript"></script>
+        <script src="scripts/e-imzo-client.js" type="text/javascript"></script>
+        <script src="scripts/micro-ajax.js" type="text/javascript"></script>
+        <script src="scripts/e-imzo-init.js" type="text/javascript"></script>
     </head>
     <body>
 
-        <?php
-
-        if(!isset($_SESSION["USER_INFO"])){
-            ?>
+        <?php if (!isset($_SESSION["USER_INFO"])) { ?>
             <main class="page">
                 <header class="brand">
                     <div class="brand__mark">E-<span>IMZO</span></div>
@@ -33,11 +28,7 @@ session_start();
                     <a class="btn" href="index.php">Войти</a>
                 </section>
             </main>
-            <?php
-            exit();
-        }
-
-        ?>
+            <?php exit();} ?>
 
         <main class="page page--wide">
             <header class="brand">
@@ -51,16 +42,16 @@ session_start();
                 <div class="meta-box" style="margin-bottom: 0.85rem;">
                     <div>
                         <strong>ID ключа</strong>
-                        <label id="keyId"><?=$_SESSION["KEY_ID"] ?? ''?></label>
+                        <label id="keyId"><?= $_SESSION["KEY_ID"] ?? "" ?></label>
                     </div>
                 </div>
                 <pre class="user-info" id="userInfo"><?php
-                    $userInfoPretty = $_SESSION["USER_INFO"];
-                    $userInfoDecoded = json_decode($userInfoPretty);
-                    if ($userInfoDecoded !== null) {
-                        $userInfoPretty = json_encode($userInfoDecoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-                    }
-                    echo htmlspecialchars($userInfoPretty, ENT_QUOTES, 'UTF-8');
+                $userInfoPretty = $_SESSION["USER_INFO"];
+                $userInfoDecoded = json_decode($userInfoPretty);
+                if ($userInfoDecoded !== null) {
+                    $userInfoPretty = json_encode($userInfoDecoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                }
+                echo htmlspecialchars($userInfoPretty, ENT_QUOTES, "UTF-8");
                 ?></pre>
             </section>
 
