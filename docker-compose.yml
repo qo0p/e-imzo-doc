@@ -1,0 +1,91 @@
+services:
+  vault:
+    build: ./vault
+    container_name: e-imzo-vault
+    restart: unless-stopped
+    cap_add:
+      - IPC_LOCK
+    environment:
+      NGINX_VAULT_TOKEN_ID: 404b847a8deb7e614be80e406c6387900fa3ef591b54aa8a
+    volumes:
+      - vault-token:/run/vault-token
+    healthcheck:
+      test: [ "CMD-SHELL", "test -f /tmp/vault-init-done && vault status >/dev/null || exit 1" ]
+      interval: 5s
+      timeout: 3s
+      start_period: 10s
+      retries: 10
+    networks:
+      - eimzo_lan
+
+  server:
+    build: ./server
+    container_name: e-imzo-server
+    restart: unless-stopped
+    environment:
+      JAVA_OPTS: ""
+      TZ: Asia/Tashkent
+    volumes:
+      - ./server/config.properties:/opt/e-imzo-server/config/config.properties:ro
+      - ./server/logging.properties:/opt/e-imzo-server/config/logging.properties:ro
+      - ./server/keys:/opt/e-imzo-server/keys
+      - ./server/logs:/opt/e-imzo-server/logs
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z -w 3 127.0.0.1 8080 || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+    networks:
+      - eimzo_lan
+
+  client:
+    build: ./client
+    container_name: e-imzo-client
+    restart: unless-stopped
+    network_mode: "service:proxy"
+    volumes:
+      - ./client:/var/www/html
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1/styles/demo.css || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+    depends_on:
+      proxy:
+        condition: service_healthy
+
+  proxy:
+    build: ./proxy
+    container_name: e-imzo-proxy
+    restart: unless-stopped
+    environment:
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN_FILE: /run/vault-token/nginx-token
+      VAULT_SECRET_PATH: secret/data/eimzo/api-keys
+      VAULT_REFRESH_INTERVAL: "300"
+    ports:
+      - "8082:8082"
+    volumes:
+      - vault-token:/run/vault-token:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8082/healthz && test -s /etc/nginx/eimzo/api-keys.json || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+    networks:
+      - eimzo_lan
+    depends_on:
+      vault:
+        condition: service_healthy
+      server:
+        condition: service_healthy
+
+networks:
+  eimzo_lan:
+    driver: bridge
+
+volumes:
+  vault-token:

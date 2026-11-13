@@ -2,6 +2,30 @@
 
 # E-IMZO - ИНСТРУКЦИЯ ПО ИНТЕГРАЦИИ
 
+## Быстрый запуск (Docker Compose)
+
+```sh
+docker compose up -d --build
+```
+
+Сайт: http://localhost:8082 — наружу открыт только этот порт. Защита proxy — [proxy/README.md](proxy/README.md#защита).
+
+| Сервис | Папка | Описание |
+|---|---|---|
+| `proxy` | [proxy/](proxy/README.md) | nginx: `/` → client, `/frontend/*` → server, `/backend/*` закрыт, `/api-keys.json` из Vault |
+| `client` | [client/](client/README.md) | Демо-сайт PHP 8.3 + Apache (сеть proxy, `/backend` → `server:8080`, API-KEY доменов из Vault) |
+| `server` | [server/](server/README.md) | e-imzo-server (JRE 8) |
+| `vault` | [vault/](vault/README.md) | HashiCorp Vault с API-KEY доменов |
+
+```mermaid
+flowchart LR
+  browser[Браузер] -->|:8082| proxy
+  proxy -->|/| client
+  proxy -->|/frontend| server
+  client -->|server:8080 /backend| server
+  proxy -->|API-KEY| vault
+```
+
 # 0. Принцип работы
 
 Демо сайт и пример https://test.e-imzo.uz/demo/

@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" />
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"></script>
+
+        <link rel="stylesheet" href="styles/demo.css" />
+    </head>
+
+    <body>
+        <div class="qr-modal-overlay"></div>
+        <div class="qr-modal">
+            <div class="modal-frame">
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="qr-img"></div>
+                    </div>
+                    <div class="col-md-5 qr-side">
+                        <div class="qr-info">
+                            <div>
+                                <div class="title">
+                                    <h4 class="qr-heading">
+                                        ОТСКАНИРУЙТЕ! <br />
+                                        <a href="https://en.wikipedia.org/wiki/QR_code">QR КОД</a>
+                                    </h4>
+                                </div>
+                                <div class="link">
+                                    <span>с помощью</span>
+                                    <br />
+                                    <a
+                                        href="https://play.google.com/store/apps/details?id=uz.yt.idcard.eimzo"
+                                        target="_blank"
+                                    >
+                                        мобильного приложения e-imzo
+                                    </a>
+                                </div>
+                                <br />
+                                <div class="qr-code-text">
+                                    e4f8e17928120fca 8ab1723072fe6bda ed62e7a884e7116f 317ab1a9a5f62e6f
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="col-sm-12 instruction-col">
+                                    <button id="download-instruction" class="btn btn-sm">Скачать инструкцию</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="footer">
+                    <div class="footer-title">Осталось ...</div>
+                    <div class="progress_bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!--  QR-code  -->
+        <script type="text/javascript" src="./scripts/crc32.js"></script>
+        <script type="text/javascript" src="./scripts/pkcs.js"></script>
+        <script type="text/javascript" src="./scripts/qrcode.min.js"></script>
+        <script type="text/javascript" src="./scripts/e-imzo-mobile.js?v=1.1"></script>
+
+        <script type="text/javascript">
+            /*============================================================================================*/
+            /**
+             * @e-imzo-lite module
+             **/
+            /*============================================================================================*/
+            $(() => {
+                var auth_url = "/frontend/mobile/auth";
+                var sign_url = "/frontend/mobile/sign";
+                var stat_url = "/frontend/mobile/status";
+
+                // variables
+
+                var errorTimeout = `Время истёкло. Попробуйте заного.`;
+                var eim;
+                var overlay_el = $(".qr-modal-overlay")[0];
+                var popup_el = $(".qr-modal")[0];
+                var qrcode_el = $(".qr-img")[0];
+                var text_hash_el = $(".qr-code-text")[0];
+                var progressbar_el = $(".footer .progress_bar")[0];
+                var timer_el = $(".footer .footer-title")[0];
+
+                // Functions
+
+                var uuidv4 = () => {
+                    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+                        .replace(/[xy]/g, function (c) {
+                            var r = (Math.random() * 16) | 0,
+                                v = c == "x" ? r : (r & 0x3) | 0x8;
+                            return v.toString(16);
+                        })
+                        .replace(/[-]/g, "");
+                };
+
+                function padLeadingZero(value) {
+                    if (value < 10) {
+                        return "0" + value;
+                    } else {
+                        return value;
+                    }
+                }
+
+                var showQRcode = function (text_hash) {
+                    progressbar_el.style.width = 0 + "%";
+
+                    let array_of_16 = text_hash.match(/.{1,16}/g);
+
+                    let array_of_16_html = ``;
+
+                    array_of_16.forEach(function (item, index) {
+                        let array_of_1 = item.match(/.{1,1}/g);
+
+                        item = ``;
+
+                        array_of_1.forEach(function (itm, idx) {
+                            if (/^\d+$/.test(itm)) item += `<span class="hash-digit">` + itm + `</span>`;
+                            else item += `<span class="hash-alpha">` + itm + `</span>`;
+                        });
+
+                        array_of_16_html += `<div class="text-monospace">` + item + `</div>`;
+                    });
+
+                    text_hash_el.innerHTML = array_of_16_html;
+
+                    $(".qr-modal").addClass("show-modal");
+                    $(".qr-modal-overlay").addClass("show-modal");
+                };
+                var hideQRcode = function () {
+                    $(".qr-modal").removeClass("show-modal");
+                    $(".qr-modal-overlay").removeClass("show-modal");
+                };
+
+                checkStatus = function (documentId, acceptedCallback) {
+                    if (!documentId) return;
+
+                    $.ajax({
+                        url: stat_url,
+                        processData: true,
+                        type: "POST",
+                        data: {
+                            documentId: documentId,
+                        },
+                        success: function (response) {
+                            if (response.status === 1) {
+                                acceptedCallback(true, response.message);
+                            } else {
+                                if (response.status === 2) {
+                                    var rate = 1 * 1000; // seconds
+                                    var edge = 100; // progress bar limit
+                                    var pace = 1; // step
+
+                                    var pv = progressbar_el.style.width;
+                                    var pv_value = pv.split("%")[0];
+
+                                    var remaining_time = ((edge - pv_value) / pace) * rate;
+
+                                    var time = Math.floor(remaining_time / 1000); // all seconds
+                                    var minutes = Math.floor(time / 60); // minutes
+                                    var seconds = padLeadingZero(time - minutes * 60); // seconds
+
+                                    progressbar_el.style.width = parseInt(pv_value, 10) + pace + "%";
+                                    timer_el.innerHTML = "Осталось " + minutes + ":" + seconds;
+
+                                    if (pv_value >= edge) {
+                                        acceptedCallback(false, errorTimeout);
+                                    } else {
+                                        setTimeout(function () {
+                                            checkStatus(documentId, acceptedCallback);
+                                        }, rate);
+                                    }
+                                } else {
+                                    acceptedCallback(false, response.message);
+                                }
+                            }
+                        },
+                        error: function (response) {
+                            acceptedCallback(false, response);
+                        },
+                    });
+                };
+
+                var isMobileDevice = function () {
+                    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                };
+
+                var callDeeplink = function (url) {
+                    window.open(url);
+                };
+
+                var makeAuth = function () {
+                    $.ajax({
+                        type: "POST",
+                        url: auth_url,
+                        success: function (response) {
+                            if (response.status === 1) {
+                                var challange = response.challange;
+                                var documentId = response.documentId;
+                                var siteId = response.siteId;
+
+                                if (!eim) {
+                                    eim = new EIMZOMobile(siteId, qrcode_el);
+                                }
+                                var res = eim.makeQRCode(documentId, challange);
+                                var hashed_qr_code = res[0];
+                                var qr = res[1];
+
+                                $("#authModal").modal("hide");
+
+                                if (isMobileDevice()) {
+                                    callDeeplink("eimzo://sign?qc=" + qr);
+                                } else {
+                                    showQRcode(hashed_qr_code);
+                                }
+                                setTimeout(function () {
+                                    checkStatus(documentId, function (success, message) {
+                                        if (success) {
+                                            if (!isMobileDevice()) {
+                                                hideQRcode();
+                                            }
+                                            window.location.href = "user_auth_result.php?documentId=" + documentId;
+                                        } else {
+                                            if (!isMobileDevice()) {
+                                                hideQRcode();
+                                            }
+                                            alert(message);
+                                        }
+                                    });
+                                }, 1 * 1000);
+                            } else {
+                                alert("Ошибка: " + response.message);
+                            }
+                        },
+                        error: function (error) {
+                            alert("Ошибка при запросе на сервер");
+                        },
+                    });
+                };
+                var makeSign = function (Document) {
+                    if (Document === "") {
+                        return;
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: sign_url,
+                        success: function (response) {
+                            if (response.status === 1) {
+                                var documentId = response.documentId;
+                                var siteId = response.siteId;
+
+                                if (!eim) {
+                                    eim = new EIMZOMobile(siteId, qrcode_el);
+                                }
+                                var res = eim.makeQRCode(documentId, Document);
+                                var hashed_qr_code = res[0];
+                                var qc = res[1];
+
+                                $("#authModal").modal("hide");
+
+                                if (isMobileDevice()) {
+                                    callDeeplink("eimzo://sign?qc=" + qc);
+                                } else {
+                                    showQRcode(hashed_qr_code);
+                                }
+
+                                setTimeout(function () {
+                                    checkStatus(documentId, function (success, message) {
+                                        if (success) {
+                                            if (!isMobileDevice()) {
+                                                hideQRcode();
+                                            }
+                                            document.signForm.documentId.value = documentId;
+                                            document.getElementById("signForm").action = "doc_verify_result.php";
+                                            document.getElementById("signForm").submit();
+                                        } else {
+                                            if (!isMobileDevice()) {
+                                                hideQRcode();
+                                            }
+                                            alert(message);
+                                        }
+                                    });
+                                }, 1 * 1000);
+                            } else {
+                                alert("Ошибка: " + response.message);
+                            }
+                        },
+                        error: function (error) {
+                            alert("Ошибка при запросе на сервер");
+                        },
+                    });
+                };
+
+                $(document)
+                    .find(".qr-modal #close-btn")
+                    .on("click", function () {
+                        $(".qr-modal").removeClass("show-modal");
+                        $(".qr-modal-overlay").removeClass("show-modal");
+                    });
+                $(document)
+                    .find(".qr-modal #download-instruction")
+                    .on("click", function () {
+                        window.open("https://dls.yt.uz/InstructionEIMZOLite.pdf", "_blank");
+                    });
+
+                // Events
+                $(".auth-button").on("click", function () {
+                    makeAuth();
+                });
+                $(".sign-button").on("click", function () {
+                    makeSign(window.signForm.Document.value);
+                });
+            });
+        </script>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm">&nbsp;</div>
+            </div>
+            <div class="row">
+                <div class="col-sm">
+                    <div class="card card-fixed">
+                        <div class="card-body">
+                            <h5 class="card-title">Идентификация</h5>
+                            <p class="card-text"></p>
+                            <a href="#" class="btn btn-primary auth-button">Вход</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm">
+                    <div class="card card-fixed">
+                        <div class="card-body">
+                            <h5 class="card-title">Документ</h5>
+                            <div class="card-text">
+                                <form id="signForm" name="signForm" method="POST">
+                                    <div class="form-group">
+                                        <label for="exampleInputDocument">Текст</label>
+                                        <input
+                                            type="input"
+                                            class="form-control"
+                                            id="exampleInputDocument"
+                                            aria-describedby="textHelp"
+                                            placeholder="Enter text"
+                                            name="Document"
+                                        />
+                                        <small id="textHelp" class="form-text text-muted"
+                                            >Введите тект для подписания</small
+                                        >
+                                        <input type="hidden" name="documentId" />
+                                    </div>
+                                </form>
+                            </div>
+                            <a href="#" class="btn btn-primary sign-button">Подписать</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
