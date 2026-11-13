@@ -1,4 +1,3 @@
 .DS_Store
-server/keys/*
-!server/keys/.gitkeep
-vault.env
+server/logs/*
+!server/logs/.gitkeep

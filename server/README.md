@@ -28,6 +28,16 @@ Docker-образ для `e-imzo-server` (JRE 8, `amazoncorretto:8-alpine3.22-jr
 docker compose restart server
 ```
 
+## Логи
+
+- Формат задаётся в `logging.properties` (`java.util.logging.SimpleFormatter.format`).
+- `entrypoint.sh` пишет вывод сервера в `docker logs` и в файл за день: `server/logs/ddMMyyyy.log` (например `13112026.log`). Новый файл — после полуночи по `TZ` (`Asia/Tashkent` в `docker-compose.yml`).
+- Папка `server/logs/` подключена как volume; `*.log` не попадают в git.
+
+```sh
+tail -f server/logs/$(date +%d%m%Y).log
+```
+
 ## Ключи
 
 Положите VPN-ключи в `server/keys/` и пропишите пути в `config.properties`:

@@ -18,10 +18,12 @@ services:
     restart: unless-stopped
     environment:
       JAVA_OPTS: ""
+      TZ: Asia/Tashkent
     volumes:
       - ./server/config.properties:/opt/e-imzo-server/config/config.properties:ro
       - ./server/logging.properties:/opt/e-imzo-server/config/logging.properties:ro
       - ./server/keys:/opt/e-imzo-server/keys
+      - ./server/logs:/opt/e-imzo-server/logs
     networks:
       - eimzo_lan
 
